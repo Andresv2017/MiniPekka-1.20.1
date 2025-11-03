@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [{ "type": "minecraft:item", "name": "mini_pekka:mini_pk_head" }]
+    }
+  ]
+}

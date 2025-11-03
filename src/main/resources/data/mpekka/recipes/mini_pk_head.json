@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "DND",
+    "IBI",
+    " N "
+  ],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "N": { "item": "minecraft:netherite_ingot" },
+    "I": { "item": "minecraft:iron_block" },
+    "B": { "item": "minecraft:diamond_block" }
+  },
+  "result": { "item": "mpekka:mini_pk_head", "count": 1 }
+}
