@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.client.render.MiniPekkaRenderer;
 import net.darkblade.mini_pekka.server.entity.MPekkaEntities;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.darkblade.mini_pekka.server.items.ModItems;
+import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -48,6 +49,7 @@ public class MiniPekkaMod
         ModBlockEntities.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModSounds.SOUNDS.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
 

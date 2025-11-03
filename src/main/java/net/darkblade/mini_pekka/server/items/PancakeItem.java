@@ -1,11 +1,12 @@
-// PancakeItem.java
 package net.darkblade.mini_pekka.server.items;
 
 import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.darkblade.mini_pekka.server.entity.MPekkaEntities;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
+import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -46,7 +47,6 @@ public class PancakeItem extends Item {
         Player player = ctx.getPlayer();
         ItemStack stack = ctx.getItemInHand();
 
-        // Crear entidad manualmente
         MiniPekka mp = MPekkaEntities.MPEKKA.get().create(server);
         if (mp == null) return InteractionResult.FAIL;
 
@@ -78,6 +78,7 @@ public class PancakeItem extends Item {
             stack.shrink(1);
         }
 
+        server.playSound(null, sx, sy, sz, ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
         return InteractionResult.CONSUME;
     }
 }

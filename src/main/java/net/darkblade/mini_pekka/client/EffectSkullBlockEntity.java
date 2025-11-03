@@ -1,6 +1,8 @@
-package net.darkblade.mini_pekka.client;
+package net.darkblade.mini_pekka.client; // <-- usa tu paquete real (client / blockentity, etc.)
 
+import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -9,8 +11,8 @@ public class EffectSkullBlockEntity extends SkullBlockEntity {
     private int animationTickCount;
     private boolean isAnimating;
 
-    public EffectSkullBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(blockPos, blockState);
+    public EffectSkullBlockEntity(BlockPos pos, BlockState state) {
+        super(pos, state);
     }
 
     @Override
@@ -18,12 +20,6 @@ public class EffectSkullBlockEntity extends SkullBlockEntity {
         return ModBlockEntities.EFFECT_SKULL.get();
     }
 
-    /**
-     * Tick de animación exclusivo para la cabeza del Mini Pekka (de pie y de pared).
-     * Activa animación si hay redstone o si el bloque es MiniPekka Head.
-     */
-
-    /*
     public static void animation(Level level, BlockPos pos, BlockState state, EffectSkullBlockEntity be) {
         boolean isMiniPekkaHead =
                 state.is(ModBlocks.MINI_PK_HEAD.get()) ||
@@ -37,10 +33,8 @@ public class EffectSkullBlockEntity extends SkullBlockEntity {
         }
     }
 
-    public float getAnimation(float partialTicks) {
-        return this.isAnimating ? (float) this.animationTickCount + partialTicks
+    public float getAnimation(float partial) {
+        return this.isAnimating ? (float) this.animationTickCount + partial
                 : (float) this.animationTickCount;
     }
-
-     */
 }

@@ -252,7 +252,7 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
 
     private AABB buildAABBFromHeadYaw(AttackHitbox hb) {
         final float yawRad  = mob.getYHeadRot() * Mth.DEG_TO_RAD;
-        final double dirX   = -Mth.sin(yawRad), dirZ = Mth.cos(yawRad); // (solo una vez)
+        final double dirX   = -Mth.sin(yawRad), dirZ = Mth.cos(yawRad);
         final double rightX = -dirZ,            rightZ = dirX;
 
         final double cx = mob.getX() + dirX * hb.forward + rightX * hb.lateral;

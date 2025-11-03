@@ -2,6 +2,7 @@ package net.darkblade.mini_pekka.server.entity;
 
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
 import net.darkblade.mini_pekka.server.items.ModItems;
+import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -54,7 +55,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         return TamableAnimal.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0)
                 .add(Attributes.FOLLOW_RANGE, 28.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.4D)
+                .add(Attributes.MOVEMENT_SPEED, 0.20D)
                 .add(Attributes.ATTACK_SPEED, 0.8D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5F)
                 .add(Attributes.ATTACK_DAMAGE, 10.0F);
@@ -75,7 +76,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 BEAR_HITBOX,
                 this::setAttacking
         ));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.2D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 8.0F, 2.0F, false));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -83,6 +84,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
     }
+
+    private long lastPancakeSfxTick = -200L;
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -95,12 +98,28 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 if (!level().isClientSide) {
                     float healAmount = 6.0F;
                     this.heal(healAmount);
+
                     ((ServerLevel) level()).sendParticles(
-                            ParticleTypes.HEART, getX(), getY() + getBbHeight() * 0.6D, getZ(),
+                            ParticleTypes.HEART,
+                            getX(), getY() + getBbHeight() * 0.6D, getZ(),
                             6, 0.3D, 0.3D, 0.3D, 0.02D
                     );
+
+                    long now = level().getGameTime();
+                    if (now - lastPancakeSfxTick >= 120L) {
+                        level().playSound(
+                                null, this.getX(), this.getY(), this.getZ(),
+                                ModSounds.PANCAKES.get(),
+                                SoundSource.NEUTRAL, 1.0f, 1.0f
+                        );
+                        lastPancakeSfxTick = now;
+                    }
+
                     level().playSound(null, this, SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 1.0f, 1.0f);
-                    if (!player.getAbilities().instabuild) stack.shrink(1);
+
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
                 }
                 return InteractionResult.sidedSuccess(level().isClientSide);
             }
@@ -123,6 +142,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
         return super.mobInteract(player, hand);
     }
+
 
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
@@ -154,10 +174,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 this.setPancakesSkin(true);
                 this.setCustomNameVisible(false);
                 super.setCustomName(null);
-            } else {
+
+                level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                        ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }
         }
     }
+
 
     private boolean hasScoreboardPancakes() {
         return this.getTags().contains("pancakes");
@@ -187,14 +210,14 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("HasPancakesSkin", this.hasPancakesSkin());
+        tag.putLong("LastPancakeSfx", this.lastPancakeSfxTick);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("HasPancakesSkin")) {
-            this.setPancakesSkin(tag.getBoolean("HasPancakesSkin"));
-        }
+        if (tag.contains("HasPancakesSkin")) this.setPancakesSkin(tag.getBoolean("HasPancakesSkin"));
+        if (tag.contains("LastPancakeSfx")) this.lastPancakeSfxTick = tag.getLong("LastPancakeSfx");
     }
 
     @Override
@@ -236,13 +259,18 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     }
 
     private void setAttacking(boolean v) {
+        boolean was = this.entityData.get(DATA_ATTACKING);
         this.entityData.set(DATA_ATTACKING, v);
+        if (!level().isClientSide && v && !was) {
+            level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                    ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+        }
     }
 
     private boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
     private static final double ATTACK_RANGE = 0.50;
-    private static final double CHASE_SPEED  = 1.2;
+    private static final double CHASE_SPEED  = 1.8;
     private static final boolean REQUIRE_LOS = true;
 
     private static final int  ATTACK_DURATION = 25;

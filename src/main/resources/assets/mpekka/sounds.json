@@ -1,0 +1,10 @@
+{
+  "entity.mini_pekka.ana": {
+    "subtitle": "subtitles.mini_pekka.ana",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/ana", "stream": false }]
+  },
+  "entity.mini_pekka.pancakes": {
+    "subtitle": "subtitles.mini_pekka.pancakes",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/pancakes", "stream": false }]
+  }
+}
