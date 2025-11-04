@@ -1,10 +1,10 @@
 {
   "entity.mini_pekka.ana": {
     "subtitle": "subtitles.mini_pekka.ana",
-    "sounds": [{ "name": "mpekka:entity/mini_pekka/ana", "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/ana", "volume": 0.45, "pitch": 1.0,"stream": false }]
   },
   "entity.mini_pekka.pancakes": {
     "subtitle": "subtitles.mini_pekka.pancakes",
-    "sounds": [{ "name": "mpekka:entity/mini_pekka/pancakes", "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/pancakes", "volume": 0.45, "pitch": 1.0,"stream": false }]
   }
 }
