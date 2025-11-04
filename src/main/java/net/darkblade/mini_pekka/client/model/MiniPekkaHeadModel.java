@@ -23,16 +23,12 @@ public class MiniPekkaHeadModel extends SkullModel {
 
         PartDefinition head = root.addOrReplaceChild(
                 "head",
-                CubeListBuilder.create()
-                .texOffs(2, 20).addBox(-4.0F, 4.0F, -3.25F, 8.0F, 8.0F, 6.4F, new CubeDeformation(0.0F))
-                        .texOffs(16, 38).addBox(-4.0F, 8.8F, -4.05F, 8.0F, 3.2F, 0.8F, new CubeDeformation(0.0F))
-                        .texOffs(38, 39).addBox(4.0F, 5.6F, -0.85F, 3.2F, 3.2F, 3.2F, new CubeDeformation(0.0F))
-                        .texOffs(46, 8).addBox(5.6F, 3.2F, -0.45F, 1.6F, 2.4F, 2.4F, new CubeDeformation(0.0F))
-                        .texOffs(46, 8).mirror().addBox(-7.2F, 3.2F, -0.45F, 1.6F, 2.4F, 2.4F, new CubeDeformation(0.0F)).mirror(false)
-                        .texOffs(38, 39).mirror().addBox(-7.2F, 5.6F, -0.85F, 3.2F, 3.2F, 3.2F, new CubeDeformation(0.0F)).mirror(false)
-                        .texOffs(2, 57).addBox(-4.0F, 4.0F, -3.25F, 5.6F, 0.0F, 5.6F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -12.0F, 0.25F)
-
-        );
+                CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, 2.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.0F))
+                        .texOffs(16, 18).addBox(-4.0F, 8.0F, -5.0F, 8.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+                        .texOffs(0, 18).addBox(4.0F, 4.0F, -1.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
+                        .texOffs(16, 23).addBox(6.0F, 1.0F, -0.5F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+                        .texOffs(16, 23).mirror().addBox(-8.0F, 1.0F, -0.5F, 2.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false)
+                        .texOffs(0, 18).mirror().addBox(-8.0F, 4.0F, -1.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(0.0F, -12.0F, 0.25F));
         return mesh;
     }
 
