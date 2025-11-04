@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.client.EffectSkullHeadLayer;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.darkblade.mini_pekka.client.ModBlockEntityModelLayers;
 import net.darkblade.mini_pekka.client.model.MiniPekkaHeadModel;
+import net.darkblade.mini_pekka.server.block.EffectSkullBlock;
 import net.darkblade.mini_pekka.server.items.EffectSkullItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -69,6 +70,7 @@ public class ClientEvents {
 
     @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModBusEvents {
+
         @SubscribeEvent
         public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.EFFECT_SKULL.get(), EffectSkullBlockRenderer::new);
@@ -79,40 +81,45 @@ public class ClientEvents {
             event.registerLayerDefinition(ModBlockEntityModelLayers.MINI_PK_HEAD, MiniPekkaHeadModel::createMiniPekkaHeadLayer);
         }
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
+        @SubscribeEvent
+        public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels event) {
+            var baked = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD);
+            event.registerSkullModel(
+                    EffectSkullBlock.Types.MINI_PEKKA,
+                    new net.minecraft.client.model.SkullModel(baked)
+            );
+        }
+
         @SubscribeEvent(priority = EventPriority.LOWEST)
         public static void registerEffectSkullHeadLayers(final EntityRenderersEvent.AddLayers event) {
-            Map<EntityType<?>, EntityRenderer<?>> renderers = Minecraft.getInstance().getEntityRenderDispatcher().renderers;
-            for (Map.Entry<EntityType<?>, EntityRenderer<?>> renderer : renderers.entrySet()) {
-                if (renderer.getValue() instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
-                    boolean flag = false;
-                    for (RenderLayer<?, ?> layer : livingEntityRenderer.layers) {
-                        if (layer instanceof CustomHeadLayer customHeadLayer) {
-                            flag = true;
-                            customHeadLayer.skullModels = EffectSkullBlockRenderer.createSkullRenderers(Minecraft.getInstance().getEntityModels());
-                        }
-                    }
-                    if (flag) {
-                        livingEntityRenderer.addLayer(new EffectSkullHeadLayer(livingEntityRenderer, Minecraft.getInstance().getEntityModels(), Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()));
+            var renderers = Minecraft.getInstance().getEntityRenderDispatcher().renderers;
+            for (var e : renderers.entrySet()) {
+                if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
+                    boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
+                    if (hasCustomHead) {
+                        ler.addLayer(new EffectSkullHeadLayer(
+                                ler,
+                                Minecraft.getInstance().getEntityModels(),
+                                Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
+                        ));
                     }
                 }
             }
 
-            Map<String, EntityRenderer<? extends Player>> skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
-            for (Map.Entry<String, EntityRenderer<? extends Player>> renderer : skins.entrySet()) {
-                if (renderer.getValue() instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
-                    boolean flag = false;
-                    for (RenderLayer<?, ?> layer : livingEntityRenderer.layers) {
-                        if (layer instanceof CustomHeadLayer customHeadLayer) {
-                            flag = true;
-                            customHeadLayer.skullModels = EffectSkullBlockRenderer.createSkullRenderers(Minecraft.getInstance().getEntityModels());
-                        }
-                    }
-                    if (flag) {
-                        livingEntityRenderer.addLayer(new EffectSkullHeadLayer(livingEntityRenderer, Minecraft.getInstance().getEntityModels(), Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()));
+            var skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
+            for (var e : skins.entrySet()) {
+                if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
+                    boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
+                    if (hasCustomHead) {
+                        ler.addLayer(new EffectSkullHeadLayer(
+                                ler,
+                                Minecraft.getInstance().getEntityModels(),
+                                Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
+                        ));
                     }
                 }
             }
         }
     }
+
 }

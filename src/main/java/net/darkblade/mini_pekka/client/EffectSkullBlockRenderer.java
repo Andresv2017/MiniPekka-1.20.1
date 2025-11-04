@@ -65,7 +65,6 @@ public class EffectSkullBlockRenderer extends SkullBlockRenderer implements Bloc
         renderSkull(facing, yRotDeg, anim, pose, buffers, packedLight, model, renderType);
     }
 
-    /** Igual que en el ejemplo: coloca el skull sobre bloque o pared y dibuja el modelo */
     public static void renderSkull(@Nullable Direction facing, float yRotDeg, float anim,
                                    PoseStack pose, MultiBufferSource buffers, int light,
                                    SkullModelBase model, RenderType rt) {
@@ -95,11 +94,6 @@ public class EffectSkullBlockRenderer extends SkullBlockRenderer implements Bloc
         builder.put(EffectSkullBlock.Types.MINI_PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
 
         return builder.build();
-    }
-
-    /** Reenvía al método estático de SkullBlockRenderer */
-    public static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile profile) {
-        return SkullBlockRenderer.getRenderType(type, profile);
     }
 }
 

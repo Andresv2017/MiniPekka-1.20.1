@@ -21,7 +21,7 @@ import java.util.Map;
 public class EffectSkullItemRenderer extends BlockEntityWithoutLevelRenderer {
     private final Map<SkullBlock.Type, SkullModelBase> skullModels;
 
-    private static final EffectSkullItemRenderer INSTANCE = new EffectSkullItemRenderer(
+    public static final EffectSkullItemRenderer INSTANCE = new EffectSkullItemRenderer(
             Minecraft.getInstance().getBlockEntityRenderDispatcher(),
             Minecraft.getInstance().getEntityModels()
     );
