@@ -18,4 +18,13 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> PANCAKES =
             SOUNDS.register("entity.mini_pekka.pancakes",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka.pancakes")));
+
+    public static final RegistryObject<SoundEvent> STEPS =
+            SOUNDS.register("entity.mini_pekka.step",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka.step")));
+
+    public static final RegistryObject<SoundEvent> DEATH =
+            SOUNDS.register("entity.mini_pekka.death",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka.death")));
+
 }

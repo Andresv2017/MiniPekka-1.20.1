@@ -10,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -205,6 +206,41 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         }
     }
 
+    private long lastStepSfxTick = 0L;
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+
+        if (!level().isClientSide && this.isAlive() && this.onGround() && !this.isInSittingPose()) {
+            var vel = this.getDeltaMovement();
+            double speed2 = vel.x * vel.x + vel.z * vel.z;
+
+            if (speed2 > 0.001D) {
+                boolean chasingOrAttacking = this.getTarget() != null || this.isAttacking();
+                int interval = chasingOrAttacking ? 10 : 30;
+
+                long now = level().getGameTime();
+                if (now - lastStepSfxTick >= interval) {
+                    level().playSound(
+                            null,
+                            this.getX(), this.getY(), this.getZ(),
+                            ModSounds.STEPS.get(),
+                            this.getSoundSource(),
+                            1.0F,
+                            1.0F
+                    );
+                    lastStepSfxTick = now;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return ModSounds.DEATH.get();
+    }
+
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
@@ -270,7 +306,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     private boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
     private static final double ATTACK_RANGE = 0.50;
-    private static final double CHASE_SPEED  = 1.8;
+    private static final double CHASE_SPEED  = 1.6;
     private static final boolean REQUIRE_LOS = true;
 
     private static final int  ATTACK_DURATION = 25;
