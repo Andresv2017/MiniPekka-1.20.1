@@ -218,7 +218,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
             if (speed2 > 0.001D) {
                 boolean chasingOrAttacking = this.getTarget() != null || this.isAttacking();
-                int interval = chasingOrAttacking ? 10 : 30;
+                int interval = chasingOrAttacking ? 20 : 30;
 
                 long now = level().getGameTime();
                 if (now - lastStepSfxTick >= interval) {
@@ -227,7 +227,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                             this.getX(), this.getY(), this.getZ(),
                             ModSounds.STEPS.get(),
                             this.getSoundSource(),
-                            1.0F,
+                            0.6F,
                             1.0F
                     );
                     lastStepSfxTick = now;
