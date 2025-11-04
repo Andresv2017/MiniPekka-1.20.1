@@ -50,7 +50,6 @@ public class PancakeItem extends Item {
         Player player = ctx.getPlayer();
         ItemStack stack = ctx.getItemInHand();
 
-        // Capturamos los estados ANTES de quitarlos para el efecto de "romper bloque"
         BlockState headState = server.getBlockState(headPos);
         BlockState ironState = server.getBlockState(ironPos);
 
@@ -74,7 +73,6 @@ public class PancakeItem extends Item {
         var max = mp.getAttribute(Attributes.MAX_HEALTH);
         if (max != null) mp.setHealth((float) max.getValue());
 
-        // Quitamos bloques del ritual
         server.removeBlock(headPos, false);
         server.removeBlock(ironPos, false);
 
@@ -86,18 +84,12 @@ public class PancakeItem extends Item {
             stack.shrink(1);
         }
 
-        // --- EFECTOS ---
-        // 1) Sonido de yunque al "aparecer"
         server.playSound(null, sx, sy, sz, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 1.0f);
 
-        // 2) Además, tu SFX de pancakes (un poco más bajo para que no sature)
         server.playSound(null, sx, sy, sz, ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 0.6f, 1.0f);
 
-        // 3) Partículas brillantes (chispas y magia)
         server.sendParticles(ParticleTypes.ENCHANT, sx, sy + 0.6D, sz, 30, 0.6D, 0.6D, 0.6D, 0.0D);
 
-        // 4) Partículas de "romper bloque" auténticas y sonido de rompimiento
-        //    (2001 = LevelEvent for block break; usa el estado pasado, no el actual)
         server.levelEvent(2001, headPos, net.minecraft.world.level.block.Block.getId(headState));
         server.levelEvent(2001, ironPos, net.minecraft.world.level.block.Block.getId(ironState));
 
