@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -38,6 +39,8 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.UUID;
+
 public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     private static final EntityDataAccessor<Boolean> PANCAKES =
@@ -54,7 +57,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 20.0)
+                .add(Attributes.MAX_HEALTH, 30.0)
                 .add(Attributes.FOLLOW_RANGE, 28.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.20D)
                 .add(Attributes.ATTACK_SPEED, 0.8D)
@@ -77,7 +80,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 BEAR_HITBOX,
                 this::setAttacking
         ));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -292,6 +295,25 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
             return event.setAndContinue(RawAnimation.begin().thenLoop("idle"));
         }
         return event.setAndContinue(RawAnimation.begin().thenLoop("walk"));
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (target instanceof Player p && this.isOwnedBy(p)) {
+            return false;
+        }
+
+        if (target instanceof TamableAnimal other) {
+            if (this.isTame() && other.isTame()) {
+                UUID me = this.getOwnerUUID();
+                UUID them = other.getOwnerUUID();
+                if (me != null && me.equals(them)) {
+                    return false;
+                }
+            }
+        }
+
+        return super.canAttack(target);
     }
 
     private void setAttacking(boolean v) {

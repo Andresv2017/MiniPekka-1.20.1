@@ -3,5 +3,8 @@
   "block.mpekka.mini_pk_wall_head": "Mini Pekka Wall Head",
   "item.mpekka.mini_pk_head": "Mini Pekka Head",
 
-  "item.mpekka.pancake": "Pancake"
+  "item.mpekka.pancake": "Pancake",
+  "item.mpekka.mk_spawn_egg": "Mini Pekka Spawn Egg",
+  "entity.mpekka.m_pk": "Mini Pekka",
+  "item.mpekka.pk_sword": "Mini Pekka Sword"
 }
