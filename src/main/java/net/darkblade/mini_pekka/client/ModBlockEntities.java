@@ -18,10 +18,10 @@ public class ModBlockEntities {
             DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MiniPekkaMod.MODID);
 
     /** BlockEntityType compartido por las cabezas con efectos, apuntando solo a MiniPekka */
-    public static final RegistryObject<BlockEntityType<EffectSkullBlockEntity>> EFFECT_SKULL =
+    public static final RegistryObject<BlockEntityType<ModSkullBlockEntity>> EFFECT_SKULL =
             BLOCK_ENTITY_TYPES.register("effect_skull",
                     () -> BlockEntityType.Builder.of(
-                                    EffectSkullBlockEntity::new,
+                                    ModSkullBlockEntity::new,
                                     ModBlocks.MINI_PK_HEAD.get(),
                                     ModBlocks.MINI_PK_WALL_HEAD.get()
                             )

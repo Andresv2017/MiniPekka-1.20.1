@@ -3,8 +3,7 @@ package net.darkblade.mini_pekka.client;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.authlib.GameProfile;
-import net.darkblade.mini_pekka.server.block.EffectSkullBlock;
+import net.darkblade.mini_pekka.server.block.ModSkullBlock;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -31,17 +30,17 @@ import java.util.Map;
 import net.darkblade.mini_pekka.MiniPekkaMod;
 
 @OnlyIn(Dist.CLIENT)
-public class EffectSkullBlockRenderer extends SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity> {
+public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity> {
     private final Map<SkullBlock.Type, SkullModelBase> modelByType;
 
     public static final ResourceLocation MINI_PEKKA_HEAD_TEX =
             new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_head/mini_pk_head.png");
 
-    public EffectSkullBlockRenderer(BlockEntityRendererProvider.Context ctx) {
+    public ModSkullBlockRenderer(BlockEntityRendererProvider.Context ctx) {
         super(ctx);
         this.modelByType = createSkullRenderers(ctx.getModelSet());
 
-        SKIN_BY_TYPE.put(EffectSkullBlock.Types.MINI_PEKKA, MINI_PEKKA_HEAD_TEX);
+        SKIN_BY_TYPE.put(ModSkullBlock.Types.MINI_PEKKA, MINI_PEKKA_HEAD_TEX);
     }
 
     @Override
@@ -91,7 +90,7 @@ public class EffectSkullBlockRenderer extends SkullBlockRenderer implements Bloc
     public static Map<SkullBlock.Type, SkullModelBase> createSkullRenderers(EntityModelSet models) {
         ImmutableMap.Builder<SkullBlock.Type, SkullModelBase> builder = ImmutableMap.builder();
 
-        builder.put(EffectSkullBlock.Types.MINI_PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
+        builder.put(ModSkullBlock.Types.MINI_PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
 
         return builder.build();
     }

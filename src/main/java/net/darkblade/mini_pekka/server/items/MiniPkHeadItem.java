@@ -10,11 +10,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.ArmorItem;
 
 import java.util.UUID;
 
-public class MiniPkHeadItem extends EffectSkullItem {
+public class MiniPkHeadItem extends ModSkullItem {
 
     private static final double NETHERITE_HELMET_ARMOR = 3.0D;
     private static final double NETHERITE_HELMET_TOUGHNESS = 3.0D;

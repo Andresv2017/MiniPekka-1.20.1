@@ -45,6 +45,8 @@ public class MiniPekkaMod
 
         MinecraftForge.EVENT_BUS.register(this);
 
+        modEventBus.addListener(this::onEntityAttributeCreation);
+
         MPekkaEntities.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
@@ -88,6 +90,10 @@ public class MiniPekkaMod
 
     }
 
+    private void onEntityAttributeCreation(final EntityAttributeCreationEvent event) {
+        event.put(MPekkaEntities.MPEKKA.get(), MiniPekka.createAttributes().build());
+    }
+
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
@@ -112,7 +118,6 @@ public class MiniPekkaMod
         @SubscribeEvent
         public static void entityAttributeEvent(EntityAttributeCreationEvent event)
         {
-            event.put(MPekkaEntities.MPEKKA.get(), MiniPekka.createAttributes().build());
 
         }
     }

@@ -2,7 +2,7 @@ package net.darkblade.mini_pekka.server.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import net.darkblade.mini_pekka.client.EffectSkullBlockEntity;
+import net.darkblade.mini_pekka.client.ModSkullBlockEntity;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,7 +20,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Map;
 
-public class EffectWallSkullBlock extends WallSkullBlock {
+public class ModWallSkullBlock extends WallSkullBlock {
 
     private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(
             Direction.NORTH, Block.box(4.0D, 4.0D, 8.0D, 12.0D, 12.0D, 16.0D),
@@ -29,7 +29,7 @@ public class EffectWallSkullBlock extends WallSkullBlock {
             Direction.WEST,  Block.box(8.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D)
     ));
 
-    public EffectWallSkullBlock(SkullBlock.Type type, Properties props) {
+    public ModWallSkullBlock(SkullBlock.Type type, Properties props) {
         super(type, props);
     }
 
@@ -40,7 +40,7 @@ public class EffectWallSkullBlock extends WallSkullBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EffectSkullBlockEntity(pos, state);
+        return new ModSkullBlockEntity(pos, state);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class EffectWallSkullBlock extends WallSkullBlock {
         if (level.isClientSide) {
             if (state.is(ModBlocks.MINI_PK_WALL_HEAD.get())) {
                 return createTickerHelper(type, ModBlockEntities.EFFECT_SKULL.get(),
-                        EffectSkullBlockEntity::animation);
+                        ModSkullBlockEntity::animation);
             }
         }
         return null;

@@ -1,8 +1,8 @@
 package net.darkblade.mini_pekka.server.items;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.darkblade.mini_pekka.client.EffectSkullBlockRenderer;
-import net.darkblade.mini_pekka.server.block.EffectSkullBlock; // Tu SkullBlock con Types.MINI_PEKKA
+import net.darkblade.mini_pekka.client.ModSkullBlockRenderer;
+import net.darkblade.mini_pekka.server.block.ModSkullBlock; // Tu SkullBlock con Types.MINI_PEKKA
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -18,21 +18,21 @@ import net.minecraft.world.level.block.SkullBlock;
 
 import java.util.Map;
 
-public class EffectSkullItemRenderer extends BlockEntityWithoutLevelRenderer {
+public class ModSkullItemRenderer extends BlockEntityWithoutLevelRenderer {
     private final Map<SkullBlock.Type, SkullModelBase> skullModels;
 
-    public static final EffectSkullItemRenderer INSTANCE = new EffectSkullItemRenderer(
+    public static final ModSkullItemRenderer INSTANCE = new ModSkullItemRenderer(
             Minecraft.getInstance().getBlockEntityRenderDispatcher(),
             Minecraft.getInstance().getEntityModels()
     );
 
-    public static EffectSkullItemRenderer getInstance() {
+    public static ModSkullItemRenderer getInstance() {
         return INSTANCE;
     }
 
-    public EffectSkullItemRenderer(BlockEntityRenderDispatcher bed, EntityModelSet modelSet) {
+    public ModSkullItemRenderer(BlockEntityRenderDispatcher bed, EntityModelSet modelSet) {
         super(bed, modelSet);
-        this.skullModels = EffectSkullBlockRenderer.createSkullRenderers(modelSet);
+        this.skullModels = ModSkullBlockRenderer.createSkullRenderers(modelSet);
     }
 
     @Override
@@ -42,12 +42,12 @@ public class EffectSkullItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (!(bi.getBlock() instanceof SkullBlock skull)) return;
 
         SkullBlock.Type type = skull.getType();
-        if (type != EffectSkullBlock.Types.MINI_PEKKA) return;
+        if (type != ModSkullBlock.Types.MINI_PEKKA) return;
 
         SkullModelBase model = this.skullModels.get(type);
         if (model == null) return;
 
         RenderType rt = SkullBlockRenderer.getRenderType(type, null);
-        EffectSkullBlockRenderer.renderSkull(null, 180.0F, 0.0F, pose, buffers, light, model, rt);
+        ModSkullBlockRenderer.renderSkull(null, 180.0F, 0.0F, pose, buffers, light, model, rt);
     }
 }

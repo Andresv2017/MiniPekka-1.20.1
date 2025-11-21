@@ -1,6 +1,6 @@
 package net.darkblade.mini_pekka.server.block;
 
-import net.darkblade.mini_pekka.client.EffectSkullBlockEntity;
+import net.darkblade.mini_pekka.client.ModSkullBlockEntity;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -13,14 +13,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class EffectSkullBlock extends SkullBlock {
+public class ModSkullBlock extends SkullBlock {
 
     @SuppressWarnings("unused")
     public enum Types implements SkullBlock.Type {
         MINI_PEKKA
     }
 
-    public EffectSkullBlock(Type type, Properties props) {
+    public ModSkullBlock(Type type, Properties props) {
         super(type, props);
     }
 
@@ -31,7 +31,7 @@ public class EffectSkullBlock extends SkullBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new EffectSkullBlockEntity(pos, state);
+        return new ModSkullBlockEntity(pos, state);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class EffectSkullBlock extends SkullBlock {
         if (level.isClientSide) {
             if (state.is(ModBlocks.MINI_PK_HEAD.get())) {
                 return createTickerHelper(type, ModBlockEntities.EFFECT_SKULL.get(),
-                        EffectSkullBlockEntity::animation);
+                        ModSkullBlockEntity::animation);
             }
         }
         return null;

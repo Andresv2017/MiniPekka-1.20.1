@@ -2,7 +2,7 @@ package net.darkblade.mini_pekka.client;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.darkblade.mini_pekka.server.block.EffectSkullBlock;
+import net.darkblade.mini_pekka.server.block.ModSkullBlock;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.SkullModel;
@@ -31,14 +31,14 @@ import net.minecraft.world.level.block.SkullBlock;
 /**
  * Capa mínima para renderizar la cabeza de Mini Pekka como casco.
  */
-public class EffectSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> & HeadedModel>
+public class ModSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> & HeadedModel>
         extends CustomHeadLayer<T, M> {
 
     private final ItemInHandRenderer itemInHandRenderer;
     private final SkullModelBase miniPekkaSkull;
 
-    public EffectSkullHeadLayer(RenderLayerParent<T, M> parent, EntityModelSet models,
-                                ItemInHandRenderer inHandRenderer) {
+    public ModSkullHeadLayer(RenderLayerParent<T, M> parent, EntityModelSet models,
+                             ItemInHandRenderer inHandRenderer) {
         super(parent, models, 1.0F, 1.0F, 1.0F, inHandRenderer);
         this.itemInHandRenderer = inHandRenderer;
         this.miniPekkaSkull = new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD));
@@ -65,7 +65,7 @@ public class EffectSkullHeadLayer<T extends LivingEntity, M extends EntityModel<
 
         if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof AbstractSkullBlock skullBlock) {
             SkullBlock.Type type = skullBlock.getType();
-            if (type == EffectSkullBlock.Types.MINI_PEKKA) {
+            if (type == ModSkullBlock.Types.MINI_PEKKA) {
                 pose.scale(0.5f, -0.5F, -0.5F);
                 if (isVillager) pose.translate(0.0F, 0.0625F, 0.0F);
                 pose.translate(-0.5D, 0.0D, -0.5D);
@@ -81,7 +81,7 @@ public class EffectSkullHeadLayer<T extends LivingEntity, M extends EntityModel<
                 RenderType rt = SkullBlockRenderer.getRenderType(type, profile);
                 float anim = entity.walkAnimation.position(partialTicks);
 
-                EffectSkullBlockRenderer.renderSkull(
+                ModSkullBlockRenderer.renderSkull(
                         null,
                         180.0F,
                         anim,

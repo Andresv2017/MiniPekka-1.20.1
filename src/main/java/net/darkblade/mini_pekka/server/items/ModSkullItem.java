@@ -9,8 +9,8 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
-public abstract class EffectSkullItem extends StandingAndWallBlockItem {
-    public EffectSkullItem(Block skull, Block wallSkull, Properties properties, Direction direction) {
+public abstract class ModSkullItem extends StandingAndWallBlockItem {
+    public ModSkullItem(Block skull, Block wallSkull, Properties properties, Direction direction) {
         super(skull, wallSkull, properties, direction);
     }
 
@@ -20,7 +20,7 @@ public abstract class EffectSkullItem extends StandingAndWallBlockItem {
         consumer.accept(new IClientItemExtensions() {
             @Override
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return EffectSkullItemRenderer.getInstance();
+                return ModSkullItemRenderer.getInstance();
             }
         });
     }
