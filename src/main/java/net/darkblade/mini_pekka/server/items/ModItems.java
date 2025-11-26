@@ -23,7 +23,7 @@ public class ModItems {
             new MiniPkHeadItem(
                     ModBlocks.MINI_PK_HEAD.get(),
                     ModBlocks.MINI_PK_WALL_HEAD.get(),
-                    new Item.Properties().rarity(Rarity.UNCOMMON),
+                    new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant(),
                     Direction.DOWN
             )
     );

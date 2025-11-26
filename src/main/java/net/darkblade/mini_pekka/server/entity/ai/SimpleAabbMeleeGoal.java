@@ -57,7 +57,7 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private static final int FAILED_PENALTY_MAX = 20;
 
     private static final boolean DEBUG = false; // TEXT
-    private static final boolean DEBUG_AABB = false; // ATTACK HITBOX
+    private static final boolean DEBUG_AABB = true; // ATTACK HITBOX
 
     public SimpleAabbMeleeGoal(
             E mob,
@@ -96,6 +96,9 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
 
     @Override
     public boolean canContinueToUse() {
+        // [FIX] Si el ataque está activo (animación en curso), continuar aunque el objetivo muera
+        if (active) return true;
+
         LivingEntity t = mob.getTarget();
         return t != null && t.isAlive();
     }
@@ -120,6 +123,13 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     @Override
     public void tick() {
         final LivingEntity target = mob.getTarget();
+
+        // [FIX] Si estamos atacando pero el objetivo es nulo o murió, solo actualizamos la animación y retornamos
+        if (active && (target == null || !target.isAlive())) {
+            updateAttackFrames();
+            return;
+        }
+
         if (target == null) { setAttackActive(false); return; }
 
         mob.getLookControl().setLookAt(target, 30.0F, 30.0F);

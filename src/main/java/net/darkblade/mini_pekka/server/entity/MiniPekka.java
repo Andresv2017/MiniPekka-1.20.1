@@ -77,7 +77,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 ATTACK_DURATION,
                 DAMAGE_FRAMES,
                 CD_BASE,
-                BEAR_HITBOX,
+                HITBOX,
                 this::setAttacking
         ));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
@@ -332,10 +332,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     private static final boolean REQUIRE_LOS = true;
 
     private static final int  ATTACK_DURATION = 25;
-    private static final int[] DAMAGE_FRAMES  = {12};
+    private static final int[] DAMAGE_FRAMES  = {22};
     private static final int  CD_BASE         = 8;
 
-    private static final SimpleAabbMeleeGoal.AttackHitbox BEAR_HITBOX =
+    private static final SimpleAabbMeleeGoal.AttackHitbox HITBOX =
             SimpleAabbMeleeGoal.AttackHitbox.of(
                     0.50,
                     1.00,
