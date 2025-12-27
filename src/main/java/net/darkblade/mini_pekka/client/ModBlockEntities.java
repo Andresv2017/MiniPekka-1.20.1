@@ -8,16 +8,11 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-/**
- * Registro mínimo de BlockEntityType para las cabezas "EffectSkull"
- * limitado únicamente a la cabeza del Mini Pekka.
- */
 public class ModBlockEntities {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
             DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MiniPekkaMod.MODID);
 
-    /** BlockEntityType compartido por las cabezas con efectos, apuntando solo a MiniPekka */
     public static final RegistryObject<BlockEntityType<ModSkullBlockEntity>> EFFECT_SKULL =
             BLOCK_ENTITY_TYPES.register("effect_skull",
                     () -> BlockEntityType.Builder.of(

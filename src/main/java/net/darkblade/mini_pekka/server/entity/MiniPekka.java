@@ -91,6 +91,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 this::setAttacking
         ));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -228,18 +229,15 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
             }
             if (viaNameTag) this.setCustomNameVisible(false);
 
-            // Lógica de Furia (Rage)
             boolean hasFury = this.hasEffect(ModEffects.RAGE.get());
             if (hasFury != this.isRaging()) {
                 this.setRaging(hasFury);
                 this.updateRageAttackSpeed(hasFury);
             }
 
-            // --- NUEVA LÓGICA: PROCESAMIENTO DEL SONIDO CON RETRASO ---
             if (this.attackSoundDelay > 0) {
                 this.attackSoundDelay--;
                 if (this.attackSoundDelay == 0) {
-                    // Se calcula el pitch basado en si tiene el efecto de furia
                     float pitch = hasFury ? 1.1f : 1.0f;
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
                             ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, pitch);

@@ -28,7 +28,6 @@ public class RagePotionItem extends PotionItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        // Sonido llamado en ambos lados para evitar latencia
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 ModSounds.RAGE_THROW.get(), SoundSource.NEUTRAL, 0.5F,
                 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));

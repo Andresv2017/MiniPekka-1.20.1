@@ -19,7 +19,6 @@ import java.util.List;
 
 public class RageThrownPotion extends ThrownPotion {
 
-    // Radio de efecto de la poción (para aplicar el efecto a entidades)
     private static final double EFFECT_RADIUS = 5.0D;
 
     public RageThrownPotion(EntityType<? extends ThrownPotion> type, Level level) {
@@ -32,9 +31,7 @@ public class RageThrownPotion extends ThrownPotion {
 
     @Override
     protected void onHit(HitResult hitResult) {
-        // CORRECCIÓN: No llamamos a super para evitar el cristal genérico vanilla
         if (!this.level().isClientSide) {
-            // Reproducimos tu sonido personalizado en el lugar del impacto
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                     ModSounds.RAGE_BREAK.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
 
@@ -51,7 +48,6 @@ public class RageThrownPotion extends ThrownPotion {
         int duration = 600; // 30 segundos
         int amplifier = 0;
 
-        // Inflate expande la caja de colisión para buscar entidades
         AABB area = this.getBoundingBox().inflate(EFFECT_RADIUS);
         List<LivingEntity> targets = this.level().getEntitiesOfClass(LivingEntity.class, area);
 
@@ -67,7 +63,6 @@ public class RageThrownPotion extends ThrownPotion {
 
     @Override
     public ItemStack getItem() {
-        // Visualmente se ve como una Splash Potion normal
         return new ItemStack(Items.SPLASH_POTION);
     }
 }

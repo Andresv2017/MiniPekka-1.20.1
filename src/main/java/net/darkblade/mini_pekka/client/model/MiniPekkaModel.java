@@ -3,6 +3,7 @@ package net.darkblade.mini_pekka.client.model;
 import net.darkblade.mini_pekka.MiniPekkaMod;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.minecraft.resources.ResourceLocation;
+import software.bernie.geckolib.core.animation.AnimationState;
 
 public class MiniPekkaModel extends CRModel<MiniPekka> {
 
