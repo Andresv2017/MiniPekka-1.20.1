@@ -8,6 +8,7 @@ import net.darkblade.mini_pekka.client.ModBlockEntityModelLayers;
 import net.darkblade.mini_pekka.client.model.MiniPekkaHeadModel;
 import net.darkblade.mini_pekka.server.block.ModSkullBlock;
 import net.darkblade.mini_pekka.server.items.ModSkullItem;
+import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -17,13 +18,12 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+
 public class ClientEvents {
-    public static int time = 0;
 
     @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT)
     public static class ClientForgeEvents {
@@ -34,7 +34,7 @@ public class ClientEvents {
             if (model instanceof HumanoidModel<?> humanoidModel) {
                 if (event.getEntity().getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ModSkullItem) {
                     humanoidModel.head.visible = false;
-                    humanoidModel.hat.visible  = false;
+                    humanoidModel.hat.visible = false;
                 }
             }
         }
@@ -45,73 +45,64 @@ public class ClientEvents {
             if (model instanceof HumanoidModel<?> humanoidModel) {
                 if (event.getEntity().getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ModSkullItem) {
                     humanoidModel.head.visible = true;
-                    humanoidModel.hat.visible  = true;
+                    humanoidModel.hat.visible = true;
                 }
             }
         }
 
 
-        @SubscribeEvent
-        public static void clientTick(TickEvent.ClientTickEvent event) {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (!minecraft.isPaused()) {
-                time++;
+        @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+        public static class ClientModBusEvents {
+
+            @SubscribeEvent
+            public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
+                event.registerBlockEntityRenderer(ModBlockEntities.EFFECT_SKULL.get(), ModSkullBlockRenderer::new);
             }
-        }
-    }
 
-    @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ClientModBusEvents {
+            @SubscribeEvent
+            public static void registerLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
+                event.registerLayerDefinition(ModBlockEntityModelLayers.MINI_PK_HEAD, MiniPekkaHeadModel::createMiniPekkaHeadLayer);
+            }
 
-        @SubscribeEvent
-        public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(ModBlockEntities.EFFECT_SKULL.get(), ModSkullBlockRenderer::new);
-        }
+            @SubscribeEvent
+            public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels event) {
+                var baked = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD);
+                event.registerSkullModel(
+                        ModSkullBlock.Types.MINI_PEKKA,
+                        new net.minecraft.client.model.SkullModel(baked)
+                );
+            }
 
-        @SubscribeEvent
-        public static void registerLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
-            event.registerLayerDefinition(ModBlockEntityModelLayers.MINI_PK_HEAD, MiniPekkaHeadModel::createMiniPekkaHeadLayer);
-        }
-
-        @SubscribeEvent
-        public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels event) {
-            var baked = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD);
-            event.registerSkullModel(
-                    ModSkullBlock.Types.MINI_PEKKA,
-                    new net.minecraft.client.model.SkullModel(baked)
-            );
-        }
-
-        @SubscribeEvent(priority = EventPriority.LOWEST)
-        public static void registerEffectSkullHeadLayers(final EntityRenderersEvent.AddLayers event) {
-            var renderers = Minecraft.getInstance().getEntityRenderDispatcher().renderers;
-            for (var e : renderers.entrySet()) {
-                if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
-                    boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
-                    if (hasCustomHead) {
-                        ler.addLayer(new ModSkullHeadLayer(
-                                ler,
-                                Minecraft.getInstance().getEntityModels(),
-                                Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
-                        ));
+            @SubscribeEvent(priority = EventPriority.LOWEST)
+            public static void registerEffectSkullHeadLayers(final EntityRenderersEvent.AddLayers event) {
+                var renderers = Minecraft.getInstance().getEntityRenderDispatcher().renderers;
+                for (var e : renderers.entrySet()) {
+                    if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
+                        boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
+                        if (hasCustomHead) {
+                            ler.addLayer(new ModSkullHeadLayer(
+                                    ler,
+                                    Minecraft.getInstance().getEntityModels(),
+                                    Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
+                            ));
+                        }
                     }
                 }
-            }
 
-            var skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
-            for (var e : skins.entrySet()) {
-                if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
-                    boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
-                    if (hasCustomHead) {
-                        ler.addLayer(new ModSkullHeadLayer(
-                                ler,
-                                Minecraft.getInstance().getEntityModels(),
-                                Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
-                        ));
+                var skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
+                for (var e : skins.entrySet()) {
+                    if (e.getValue() instanceof LivingEntityRenderer<?, ?> ler) {
+                        boolean hasCustomHead = ler.layers.stream().anyMatch(l -> l instanceof CustomHeadLayer);
+                        if (hasCustomHead) {
+                            ler.addLayer(new ModSkullHeadLayer(
+                                    ler,
+                                    Minecraft.getInstance().getEntityModels(),
+                                    Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer()
+                            ));
+                        }
                     }
                 }
             }
         }
     }
-
 }

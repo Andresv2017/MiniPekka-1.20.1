@@ -6,5 +6,7 @@
   "item.mpekka.pancake": "Pancake",
   "item.mpekka.mk_spawn_egg": "Mini Pekka Spawn Egg",
   "entity.mpekka.m_pk": "Mini Pekka",
-  "item.mpekka.pk_sword": "Mini Pekka Sword"
+  "item.mpekka.pk_sword": "Mini Pekka Sword",
+  "item.mpekka.rage_potion": "Rage Potion",
+  "effect.mpekka.rage": "Rage"
 }

@@ -14,5 +14,13 @@
   "entity.mini_pekka.death": {
     "subtitle": "subtitles.mini_pekka.death",
     "sounds": [{ "name": "mpekka:entity/mini_pekka/death", "volume": 2.5, "pitch": 1.0, "stream": false }]
+  },
+  "rage_throw": {
+    "subtitle": "subtitles.mpekka.rage_throw",
+    "sounds": [{ "name": "mpekka:rage_throw", "volume": 0.8, "pitch": 1.0 }]
+  },
+  "rage_break": {
+    "subtitle": "subtitles.mpekka.rage_break",
+    "sounds": [{ "name": "mpekka:rage_break", "volume": 1.0, "pitch": 1.0 }]
   }
 }

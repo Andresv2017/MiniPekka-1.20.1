@@ -43,6 +43,9 @@ public class ModItems {
             () -> new PkSwordItem(Tiers.NETHERITE, 3.5F, -2.4F,
                     new Item.Properties().fireResistant().rarity(Rarity.RARE)));
 
+    public static final RegistryObject<Item> RAGE_POTION = ITEMS.register("rage_potion",
+            () -> new RagePotionItem(new Item.Properties().stacksTo(1)));
+
     @SubscribeEvent
     public static void onBuildCreativeTab(BuildCreativeModeTabContentsEvent e) {
         if (e.getTabKey().equals(CreativeModeTabs.FUNCTIONAL_BLOCKS)) {
@@ -56,6 +59,9 @@ public class ModItems {
         }
         if (e.getTabKey().equals(CreativeModeTabs.COMBAT)) {
             e.accept(PK_SWORD);
+        }
+        if (e.getTabKey().equals(CreativeModeTabs.TOOLS_AND_UTILITIES)) {
+            e.accept(RAGE_POTION);
         }
     }
 }

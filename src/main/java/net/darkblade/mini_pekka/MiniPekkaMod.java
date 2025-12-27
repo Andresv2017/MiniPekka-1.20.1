@@ -1,16 +1,21 @@
 package net.darkblade.mini_pekka;
 import com.mojang.logging.LogUtils;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
+import net.darkblade.mini_pekka.client.particles.RageParticle;
+import net.darkblade.mini_pekka.client.particles.ModParticles;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.darkblade.mini_pekka.client.render.MiniPekkaRenderer;
+import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.MPekkaEntities;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -37,13 +42,15 @@ public class MiniPekkaMod
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public MiniPekkaMod(FMLJavaModLoadingContext context)
+    public MiniPekkaMod()
     {
-        IEventBus modEventBus = context.getModEventBus();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+        ModParticles.register(modEventBus);
+        ModEffects.register(modEventBus);
 
         modEventBus.addListener(this::onEntityAttributeCreation);
 
@@ -100,6 +107,11 @@ public class MiniPekkaMod
     {
 
         @SubscribeEvent
+        public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+            event.registerSpriteSet(ModParticles.RAGE_AURA.get(), RageParticle.Provider::new);
+        }
+
+        @SubscribeEvent
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 
         }
@@ -113,6 +125,12 @@ public class MiniPekkaMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             EntityRenderers.register(MPekkaEntities.MPEKKA.get(), MiniPekkaRenderer::new);
+            event.enqueueWork(() -> {
+                EntityRenderers.register(
+                        MPekkaEntities.RAGE_POTION_PROJECTILE.get(),
+                        (context) -> new ThrownItemRenderer<>(context, 1.0F, true)
+                );
+            });
         }
 
         @SubscribeEvent

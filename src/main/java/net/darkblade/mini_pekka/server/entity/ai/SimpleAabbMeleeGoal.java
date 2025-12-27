@@ -5,13 +5,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.TamableAnimal;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
@@ -41,9 +47,16 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private final AttackHitbox HITBOX;
     private final AttackAnimBridge animBridge;
 
+    private int dynamicAttackDuration;
+    private int[] dynamicDamageFrames;
+    private int dynamicAttackDelayTicks;
+
     private boolean active = false;
     private int tick = 0;
     private int cooldown = 0;
+
+    // NEW: Debug para medir el tiempo real
+    private int attackStartTimeTick = 0;
 
     private Path path;
     private double pathedTargetX, pathedTargetY, pathedTargetZ;
@@ -56,8 +69,18 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private static final int RECALC_BASE_MAX = 4;
     private static final int FAILED_PENALTY_MAX = 20;
 
-    private static final boolean DEBUG = false; // TEXT
-    private static final boolean DEBUG_AABB = true; // ATTACK HITBOX
+    private static final boolean DEBUG = false; // TEXT (original System.out.printf)
+    private static final boolean DEBUG_AABB = false; // ATTACK HITBOX
+    private static final boolean DEBUG_HUD = false; // NEW: Activar/desactivar el debug en la action bar
+
+    // Debug HUD Variables
+    private int dbgNextSendTick = 0;
+    private String dbgCachedLine = "";
+    private boolean dbgPrevActive = false;
+    private String dbgStickyMsg = "";
+    private int dbgStickyUntilTick = 0;
+    private int dbgStickyPrio = 0;
+    private int dbgStickySetTick = -9999;
 
     public SimpleAabbMeleeGoal(
             E mob,
@@ -79,6 +102,10 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         this.COOLDOWN_BASE_TICKS = cooldownBase;
         this.HITBOX = hitbox;
         this.animBridge = animBridge;
+
+        this.dynamicAttackDuration = durationTicks;
+        this.dynamicDamageFrames = damageFrames;
+        this.dynamicAttackDelayTicks = 20;
 
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
@@ -127,6 +154,8 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         // [FIX] Si estamos atacando pero el objetivo es nulo o murió, solo actualizamos la animación y retornamos
         if (active && (target == null || !target.isAlive())) {
             updateAttackFrames();
+            // NEW: Actualizar la Action Bar aunque no haya objetivo, si estamos activos
+            if (!mob.level().isClientSide) renderDebugActionbar(null);
             return;
         }
 
@@ -206,6 +235,11 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         if (active && !inEdgeRange) {
             mob.getNavigation().moveTo(target, CHASE_SPEED);
         }
+
+        // NEW: Actualizar la Action Bar para el dueño
+        if (!mob.level().isClientSide) {
+            renderDebugActionbar(target);
+        }
     }
 
     private boolean isInAttackRangeEdgeXZ(LivingEntity target) {
@@ -228,14 +262,28 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     }
 
     protected void resetAttackCooldown() {
-        this.ticksUntilNextAttack = this.adjustedTickDelay(20);
+        refreshAttackTempos();
+        this.ticksUntilNextAttack = this.adjustedTickDelay(dynamicAttackDelayTicks);
     }
 
-    private void startAttack() { tick = 0; setAttackActive(true); }
+    private void startAttack() {
+        refreshAttackTempos();
+        tick = 0;
+        setAttackActive(true);
+        // NEW: Registrar inicio y enviar debug
+        attackStartTimeTick = mob.tickCount;
+        double speed = computeAttackSpeedScale();
+        debugHud(String.format("ATTACK START (Scale: %.2f)", speed));
+    }
 
     private void endAttack() {
         setAttackActive(false);
         cooldown = COOLDOWN_BASE_TICKS;
+        // NEW: Calcular duración y enviar debug
+        int duration = mob.tickCount - attackStartTimeTick;
+        double speed = computeAttackSpeedScale(); // Recalculamos la escala por si terminó el efecto de Rage
+        double expectedDur = DURATION_TICKS * speed;
+        debugHud(String.format("ATTACK END (Duration: %d ticks, Expected: %.2f)", duration, expectedDur));
     }
 
     private void setAttackActive(boolean v) {
@@ -247,7 +295,8 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private void updateAttackFrames() {
         if (cooldown > 0) cooldown--;
         tick++;
-        for (int f : DAMAGE_FRAMES) {
+        int[] frames = dynamicDamageFrames != null ? dynamicDamageFrames : DAMAGE_FRAMES;
+        for (int f : frames) {
             if (tick == f) {
                 AABB box = buildAABBFromHeadYaw(HITBOX);
                 applyDamageInBox(box);
@@ -257,7 +306,8 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
                 break;
             }
         }
-        if (tick >= DURATION_TICKS) endAttack();
+        int duration = dynamicAttackDuration > 0 ? dynamicAttackDuration : DURATION_TICKS;
+        if (tick >= duration) endAttack();
     }
 
     private AABB buildAABBFromHeadYaw(AttackHitbox hb) {
@@ -280,5 +330,121 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
                 e.isAlive() && e != mob && mob.canAttack(e);
         List<LivingEntity> victims = mob.level().getEntitiesOfClass(LivingEntity.class, box, filter);
         for (LivingEntity v : victims) mob.doHurtTarget(v);
+    }
+
+    private void refreshAttackTempos() {
+        double scale = computeAttackSpeedScale();
+        this.dynamicAttackDuration = Math.max(5, (int) Math.round(this.DURATION_TICKS * scale));
+        if (this.DAMAGE_FRAMES.length > 0) {
+            int[] scaled = new int[this.DAMAGE_FRAMES.length];
+            int prev = 0;
+            for (int i = 0; i < this.DAMAGE_FRAMES.length; i++) {
+                int frame = Math.max(1, (int) Math.round(this.DAMAGE_FRAMES[i] * scale));
+                int maxFrame = Math.max(1, this.dynamicAttackDuration - 1);
+                if (frame >= maxFrame) {
+                    frame = maxFrame;
+                }
+                if (i > 0 && frame <= prev) {
+                    frame = prev + 1;
+                }
+                prev = frame;
+                scaled[i] = frame;
+            }
+            this.dynamicDamageFrames = scaled;
+        } else {
+            this.dynamicDamageFrames = this.DAMAGE_FRAMES;
+        }
+        // Se escala el delay base (20 ticks por defecto si no se especifica)
+        this.dynamicAttackDelayTicks = Math.max(1, (int) Math.round(20 * scale));
+    }
+
+    private double computeAttackSpeedScale() {
+        AttributeInstance attr = mob.getAttribute(Attributes.ATTACK_SPEED);
+        if (attr == null) {
+            return 1.0D;
+        }
+        double current = attr.getValue();
+        double base = mob.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+        if (current <= 0.0D || base <= 0.0D) {
+            return 1.0D;
+        }
+        // Calcula la escala, usando la relación BASE / ACTUAL
+        double ratio = base / current;
+        return Mth.clamp(ratio, 0.3D, 3.0D);
+    }
+
+    // ===================== DEBUG HUD FUNCTIONS =====================
+
+    // NEW: Helper para obtener al dueño (si existe y está cerca) para enviar el mensaje.
+    private Player getOwnerPlayer() {
+        if (mob.level().isClientSide || !(mob instanceof TamableAnimal tamable)) return null;
+        if (!tamable.isTame()) return null;
+
+        UUID ownerUUID = tamable.getOwnerUUID();
+        if (ownerUUID == null) return null;
+
+        // Devuelve al dueño si está en el mundo
+        return mob.level().getPlayerByUUID(ownerUUID);
+    }
+
+    private static String fmt(double d) { return String.format("%.2f", d); }
+
+    private void renderDebugActionbar(LivingEntity target) {
+        if (!DEBUG_HUD) return;
+        Player owner = getOwnerPlayer();
+        if (owner == null) return;
+
+        int now = mob.tickCount;
+
+        // === Parte fija/base ===
+        double speed = computeAttackSpeedScale();
+        AttributeInstance attr = mob.getAttribute(Attributes.ATTACK_SPEED);
+        double currentAS = attr != null ? attr.getValue() : 1.0;
+
+        String base = (active ? ("ATK_T:" + tick) : ("CD:" + ticksUntilNextAttack))
+                + " | DUR:" + dynamicAttackDuration
+                + " | DELAY:" + dynamicAttackDelayTicks
+                + " | AS:" + fmt(currentAS)
+                + " | Scale:" + fmt(speed)
+                + " | RAGE:" + (speed < 1.0 ? "Y" : "N");
+
+        // === Mensaje Sticky (Inicio/Fin de Ataque) ===
+        String sticky = (now < dbgStickyUntilTick && !dbgStickyMsg.isEmpty())
+                ? " | " + dbgStickyMsg
+                : "";
+
+        String line = base + sticky;
+
+        boolean mustUpdate = (active != dbgPrevActive)
+                || (now >= dbgNextSendTick)
+                || (!line.equals(dbgCachedLine));
+
+        if (mustUpdate) {
+            owner.displayClientMessage(Component.literal(line), true);
+            dbgCachedLine = line;
+            dbgPrevActive = active;
+            dbgNextSendTick = now + 5;
+        }
+    }
+
+    private void debugHud(String msg) {
+        if (!DEBUG_HUD) return;
+        Player owner = getOwnerPlayer();
+        if (owner == null) return;
+
+        int now = mob.tickCount;
+
+        int prio = 1;
+        if (msg.startsWith("ATTACK START")) prio = 3;
+        else if (msg.startsWith("ATTACK END")) prio = 2;
+
+        boolean stickyActive = now < dbgStickyUntilTick;
+        if (stickyActive && prio < dbgStickyPrio) return;
+        if (dbgStickySetTick == now && prio < dbgStickyPrio) return;
+
+        dbgStickyMsg = msg;
+        dbgStickyPrio = prio;
+        dbgStickyUntilTick = now + 40; // 2s
+        dbgStickySetTick = now;
     }
 }

@@ -1,5 +1,6 @@
 package net.darkblade.mini_pekka.server.entity;
 
+import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
 import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
@@ -15,10 +16,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
@@ -45,9 +50,14 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     private static final EntityDataAccessor<Boolean> PANCAKES =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
-
     private static final EntityDataAccessor<Boolean> DATA_ATTACKING =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> RAGING =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+
+    private static final UUID RAGE_ATTACK_SPEED_UUID =
+            UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
+
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -90,6 +100,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     }
 
     private long lastPancakeSfxTick = -200L;
+    private int attackSoundDelay = -1;
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -147,6 +158,9 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         return super.mobInteract(player, hand);
     }
 
+    public float cachedHeadYaw = 0F;
+
+    public float cachedHeadPitch = 0F;
 
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
@@ -159,6 +173,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         super.defineSynchedData();
         this.entityData.define(PANCAKES, false);
         this.entityData.define(DATA_ATTACKING, false);
+        this.entityData.define(RAGING, false);
     }
 
     public boolean hasPancakesSkin() {
@@ -168,6 +183,11 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     public void setPancakesSkin(boolean value) {
         this.entityData.set(PANCAKES, value);
     }
+
+    public boolean isRaging() {return this.entityData.get(RAGING);}
+
+    public void setRaging(boolean value) {this.entityData.set(RAGING, value);}
+
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -193,19 +213,60 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     @Override
     public void tick() {
         super.tick();
+
         if (!level().isClientSide) {
+            // Lógica de nombres/skins (Pancakes)
             boolean viaNameTag = this.hasCustomName()
                     && this.getCustomName() != null
                     && "pancakes".equalsIgnoreCase(this.getCustomName().getString().trim());
 
             boolean viaScoreboard = hasScoreboardPancakes();
-
             boolean desired = this.hasPancakesSkin() || viaNameTag || viaScoreboard;
 
             if (desired != this.hasPancakesSkin()) {
                 this.setPancakesSkin(desired);
             }
             if (viaNameTag) this.setCustomNameVisible(false);
+
+            // Lógica de Furia (Rage)
+            boolean hasFury = this.hasEffect(ModEffects.RAGE.get());
+            if (hasFury != this.isRaging()) {
+                this.setRaging(hasFury);
+                this.updateRageAttackSpeed(hasFury);
+            }
+
+            // --- NUEVA LÓGICA: PROCESAMIENTO DEL SONIDO CON RETRASO ---
+            if (this.attackSoundDelay > 0) {
+                this.attackSoundDelay--;
+                if (this.attackSoundDelay == 0) {
+                    // Se calcula el pitch basado en si tiene el efecto de furia
+                    float pitch = hasFury ? 1.1f : 1.0f;
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, pitch);
+                    this.attackSoundDelay = -1; // Resetear el contador
+                }
+            }
+        }
+    }
+
+    private void updateRageAttackSpeed(boolean raging) {
+        AttributeInstance attr = this.getAttribute(Attributes.ATTACK_SPEED);
+        if (attr == null) {
+            return;
+        }
+
+        AttributeModifier existing = attr.getModifier(RAGE_ATTACK_SPEED_UUID);
+        if (existing != null) {
+            attr.removeModifier(existing);
+        }
+
+        if (raging) {
+            attr.addTransientModifier(new AttributeModifier(
+                    RAGE_ATTACK_SPEED_UUID,
+                    "mini_pekka_rage_attack_speed",
+                    0.3D,
+                    AttributeModifier.Operation.MULTIPLY_TOTAL
+            ));
         }
     }
 
@@ -319,13 +380,15 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     private void setAttacking(boolean v) {
         boolean was = this.entityData.get(DATA_ATTACKING);
         this.entityData.set(DATA_ATTACKING, v);
+
+        // Si empieza a atacar (v es true y antes era false)
         if (!level().isClientSide && v && !was) {
-            level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                    ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+            // En lugar de sonar aquí, activamos el retraso de 10 ticks
+            this.attackSoundDelay = 10;
         }
     }
 
-    private boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
+    public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
     private static final double ATTACK_RANGE = 0.50;
     private static final double CHASE_SPEED  = 1.6;
@@ -357,5 +420,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob mate) {
         return null;
+    }
+
+    @Override
+    public void onEffectRemoved(MobEffectInstance effect) {
+        super.onEffectRemoved(effect);
+        if (effect.getEffect() == ModEffects.RAGE.get()) {
+            updateRageAttackSpeed(false);
+        }
     }
 }
