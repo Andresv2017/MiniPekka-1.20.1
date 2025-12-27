@@ -28,11 +28,11 @@ public class ModSounds {
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka.death")));
 
     public static final RegistryObject<SoundEvent> RAGE_THROW =
-            SOUNDS.register("rage_throw",
-                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "rage_throw")));
+            SOUNDS.register("rage.rage_throw",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "rage.rage_throw")));
 
     public static final RegistryObject<SoundEvent> RAGE_BREAK =
-            SOUNDS.register("rage_break",
-                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "rage_break")));
+            SOUNDS.register("rage.rage_break",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "rage.rage_break")));
 
 }

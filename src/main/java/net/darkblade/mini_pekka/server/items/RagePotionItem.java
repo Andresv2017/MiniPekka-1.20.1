@@ -28,19 +28,16 @@ public class RagePotionItem extends PotionItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
+        // Sonido llamado en ambos lados para evitar latencia
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                ModSounds.RAGE_THROW.get(), SoundSource.NEUTRAL, 0.5F,
+                0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+
         if (!level.isClientSide) {
-
             RageThrownPotion potion = new RageThrownPotion(level, player);
-
             potion.setItem(itemstack);
-            potion.setXRot(potion.getXRot() - -20.0F);
-
             potion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.7F, 1.0F);
-
             level.addFreshEntity(potion);
-
-            level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    ModSounds.RAGE_THROW.get(), SoundSource.NEUTRAL, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
         }
 
         if (!player.getAbilities().instabuild) {

@@ -32,24 +32,17 @@ public class RageThrownPotion extends ThrownPotion {
 
     @Override
     protected void onHit(HitResult hitResult) {
-        // Importante: No llamamos a super.onHit(hitResult) si no queremos el efecto de poción vanilla (cristal roto genérico)
-        super.onHit(hitResult);
-
+        // CORRECCIÓN: No llamamos a super para evitar el cristal genérico vanilla
         if (!this.level().isClientSide) {
-            // --- AGREGAR SONIDO AQUÍ ---
-            // Reproducimos el sonido de ruptura en la ubicación exacta del impacto
+            // Reproducimos tu sonido personalizado en el lugar del impacto
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                     ModSounds.RAGE_BREAK.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
 
-            // Lógica visual: Generar particulas en el servidor para que todos las vean
             if (this.level() instanceof ServerLevel serverLevel) {
                 ModParticleUtils.spawnRageAura(serverLevel, hitResult.getLocation());
             }
 
-            // Lógica lógica: Aplicar efecto
             this.applyRageEffects();
-
-            // Despachar la entidad (borrarla)
             this.discard();
         }
     }
