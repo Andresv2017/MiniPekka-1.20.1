@@ -67,12 +67,12 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 40.0)
+                .add(Attributes.MAX_HEALTH, 50.0)
                 .add(Attributes.FOLLOW_RANGE, 28.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.20D)
                 .add(Attributes.ATTACK_SPEED, 0.8D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5F)
-                .add(Attributes.ATTACK_DAMAGE, 16.0F);
+                .add(Attributes.ATTACK_DAMAGE, 18.0F);
     }
 
     @Override
