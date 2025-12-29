@@ -1,4 +1,11 @@
 {
-  "parent": "minecraft:item/template_skull"
+  "parent": "minecraft:item/template_skull",
+  "display": {
+    "gui": {
+      "rotation": [ 30, 45, 0 ],
+      "translation": [ 0, 1.8, 0.2 ],
+      "scale": [ 0.90, 0.90, 0.90 ]
+    }
+  }
 }
 

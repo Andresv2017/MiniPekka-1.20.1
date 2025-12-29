@@ -36,7 +36,7 @@ public class RageThrownPotion extends ThrownPotion {
                     ModSounds.RAGE_BREAK.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
 
             if (this.level() instanceof ServerLevel serverLevel) {
-                ModParticleUtils.spawnRageAura(serverLevel, hitResult.getLocation());
+                ModParticleUtils.spawnRageAura(serverLevel, hitResult.getLocation(), EFFECT_RADIUS);
             }
 
             this.applyRageEffects();
@@ -45,7 +45,7 @@ public class RageThrownPotion extends ThrownPotion {
     }
 
     protected void applyRageEffects() {
-        int duration = 600; // 30 segundos
+        int duration = 600;
         int amplifier = 0;
 
         AABB area = this.getBoundingBox().inflate(EFFECT_RADIUS);

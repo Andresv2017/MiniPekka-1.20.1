@@ -45,23 +45,4 @@ public class ModItems {
 
     public static final RegistryObject<Item> RAGE_POTION = ITEMS.register("rage_potion",
             () -> new RagePotionItem(new Item.Properties().stacksTo(1)));
-
-    @SubscribeEvent
-    public static void onBuildCreativeTab(BuildCreativeModeTabContentsEvent e) {
-        if (e.getTabKey().equals(CreativeModeTabs.FUNCTIONAL_BLOCKS)) {
-            e.accept(MINI_PK_HEAD);
-        }
-        if (e.getTabKey().equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
-            e.accept(PANCAKE);
-        }
-        if (e.getTabKey().equals(CreativeModeTabs.SPAWN_EGGS)) {
-            e.accept(MP_SPAWN_EGG);
-        }
-        if (e.getTabKey().equals(CreativeModeTabs.COMBAT)) {
-            e.accept(PK_SWORD);
-        }
-        if (e.getTabKey().equals(CreativeModeTabs.TOOLS_AND_UTILITIES)) {
-            e.accept(RAGE_POTION);
-        }
-    }
 }
