@@ -3,6 +3,7 @@ import com.mojang.logging.LogUtils;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.darkblade.mini_pekka.client.particles.RageParticle;
 import net.darkblade.mini_pekka.client.particles.ModParticles;
+import net.darkblade.mini_pekka.constants.CRConstans;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.darkblade.mini_pekka.client.render.MiniPekkaRenderer;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
@@ -28,6 +29,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.slf4j.Logger;
+import software.bernie.geckolib.core.molang.LazyVariable;
+import software.bernie.geckolib.core.molang.MolangParser;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
@@ -59,6 +62,9 @@ public class MiniPekkaMod
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
+
+        MolangParser.INSTANCE.register(new LazyVariable(CRConstans.HEAD_X_QUERY, 0));
+        MolangParser.INSTANCE.register(new LazyVariable(CRConstans.HEAD_Y_QUERY, 0));
 
         modEventBus.addListener(this::addCreative);
 
