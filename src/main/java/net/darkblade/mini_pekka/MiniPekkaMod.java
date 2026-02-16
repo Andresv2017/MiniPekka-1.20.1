@@ -14,11 +14,18 @@ import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -37,7 +44,6 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(MiniPekkaMod.MODID)
 public class MiniPekkaMod
 {
@@ -89,6 +95,15 @@ public class MiniPekkaMod
             } catch (Throwable t) {
                 LOGGER.error("[mpekka] Could not replace SKULL validBlocks", t);
             }
+
+            ItemStack awkwardPotion = new ItemStack(Items.POTION);
+            PotionUtils.setPotion(awkwardPotion, Potions.AWKWARD);
+
+            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
+                    Ingredient.of(awkwardPotion),
+                    Ingredient.of(Items.AMETHYST_SHARD),
+                    new ItemStack(ModItems.RAGE_POTION.get())
+            ));
         });
     }
 

@@ -216,7 +216,6 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         super.tick();
 
         if (!level().isClientSide) {
-            // Lógica de nombres/skins (Pancakes)
             boolean viaNameTag = this.hasCustomName()
                     && this.getCustomName() != null
                     && "pancakes".equalsIgnoreCase(this.getCustomName().getString().trim());
@@ -241,7 +240,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                     float pitch = hasFury ? 1.1f : 1.0f;
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
                             ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, pitch);
-                    this.attackSoundDelay = -1; // Resetear el contador
+                    this.attackSoundDelay = -1;
                 }
             }
         }
@@ -379,9 +378,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         boolean was = this.entityData.get(DATA_ATTACKING);
         this.entityData.set(DATA_ATTACKING, v);
 
-        // Si empieza a atacar (v es true y antes era false)
         if (!level().isClientSide && v && !was) {
-            // En lugar de sonar aquí, activamos el retraso de 10 ticks
             this.attackSoundDelay = 10;
         }
     }
