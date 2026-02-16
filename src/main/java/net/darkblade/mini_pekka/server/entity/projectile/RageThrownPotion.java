@@ -9,6 +9,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.darkblade.mini_pekka.server.items.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -63,6 +64,6 @@ public class RageThrownPotion extends ThrownPotion {
 
     @Override
     public ItemStack getItem() {
-        return new ItemStack(Items.SPLASH_POTION);
+        return new ItemStack(ModItems.RAGE_POTION.get());
     }
 }

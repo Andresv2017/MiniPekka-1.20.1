@@ -15,15 +15,15 @@ public class ModCreativeModeTabs {
 
     public static final RegistryObject<CreativeModeTab> MPEKKA_TAB = CREATIVE_MODE_TABS.register("mpekka_tab",
             () -> CreativeModeTab.builder()
-                    .icon(() -> new ItemStack(ModItems.MINI_PK_HEAD.get())) // Icono de la pestaña
-                    .title(Component.translatable("creativetab.mpekka_tab")) // Nombre visible
+                    .icon(() -> new ItemStack(ModItems.MINI_PK_HEAD.get()))
+                    .title(Component.translatable("creativetab.mpekka_tab"))
                     .displayItems((parameters, output) -> {
-                        // Añade todos los items del mod aquí
                         output.accept(ModItems.MINI_PK_HEAD.get());
                         output.accept(ModItems.PK_SWORD.get());
                         output.accept(ModItems.PANCAKE.get());
                         output.accept(ModItems.RAGE_POTION.get());
                         output.accept(ModItems.MP_SPAWN_EGG.get());
+                        output.accept(ModItems.STAR_ITEM.get());
                     })
                     .build());
 

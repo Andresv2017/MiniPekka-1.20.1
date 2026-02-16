@@ -13,12 +13,19 @@ public class MiniPekkaModel extends CRModel<MiniPekka> {
     }
 
     @Override
-    public ResourceLocation getTextureResource(MiniPekka miniPekka) {
-        if (miniPekka.hasPancakesSkin()) {
+    public ResourceLocation getTextureResource(MiniPekka animatable) {
+        boolean isPancake = animatable.hasPancakesSkin();
+        boolean isStar = animatable.isStarMode();
+
+        if (isStar && isPancake) {
+            return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_star_pancake.png");
+        } else if (isStar) {
+            return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_star.png");
+        } else if (isPancake) {
             return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_pancake.png");
-        } else {
-            return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk.png");
         }
+
+        return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk.png");
     }
 
     @Override

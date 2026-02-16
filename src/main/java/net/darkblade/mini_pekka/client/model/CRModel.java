@@ -17,11 +17,12 @@ public abstract class CRModel<T extends MiniPekka> extends GeoModel<T> {
 
         float pt = animationState.getPartialTick();
 
-        float maxYaw = 45.0F;
+        float maxYaw = 40.0F;
+        float maxPitch = 30.0F;
         float initialYaw = animatable.getViewYRot(pt) - Mth.lerp(pt, animatable.yBodyRotO, animatable.yBodyRot);
 
-        animatable.cachedHeadYaw = Mth.clamp(initialYaw, -maxYaw, maxYaw);
-        animatable.cachedHeadPitch = animatable.getViewXRot(pt);
+        animatable.setCachedHeadYaw(Mth.clamp(initialYaw, -maxYaw, maxYaw));
+        animatable.setCachedHeadPitch(Mth.clamp(animatable.getViewXRot(pt), -maxPitch, maxPitch));
     }
 
     @Override
@@ -30,8 +31,8 @@ public abstract class CRModel<T extends MiniPekka> extends GeoModel<T> {
 
         MolangParser parser = MolangParser.INSTANCE;
 
-        parser.setValue(HEAD_Y_QUERY, () -> animatable.cachedHeadYaw);
-        parser.setValue(HEAD_X_QUERY, () -> animatable.cachedHeadPitch);
+        parser.setValue(HEAD_Y_QUERY, () -> animatable.getCachedHeadYaw());
+        parser.setValue(HEAD_X_QUERY, () -> animatable.getCachedHeadPitch());
 
     }
 }

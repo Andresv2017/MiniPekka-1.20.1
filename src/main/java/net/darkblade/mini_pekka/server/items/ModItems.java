@@ -45,4 +45,7 @@ public class ModItems {
 
     public static final RegistryObject<Item> RAGE_POTION = ITEMS.register("rage_potion",
             () -> new RagePotionItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> STAR_ITEM = ITEMS.register("star_item",
+            () -> new Item(new Item.Properties()));
 }

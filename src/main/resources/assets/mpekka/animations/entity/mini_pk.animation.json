@@ -262,7 +262,7 @@
 			"loop": true,
 			"bones": {
 				"group": {
-					"rotation": [0, "math.cos(query.anim_time*360)*15", 0]
+					"rotation": [0, "math.cos(query.anim_time*360)*7", 0]
 				},
 				"arm": {
 					"rotation": [-85.99161, -29.4987, "-5.7251051733 -math.cos(-160+query.anim_time*360)*5"],
@@ -285,7 +285,7 @@
 					"position": [0, "-math.cos(-80+query.anim_time*720)*0.5", 0]
 				},
 				"head": {
-					"rotation": ["query.head_x_rotation", " -math.cos(query.anim_time*360-25)*10 + query.head_y_rotation", 0],
+					"rotation": ["query.head_x_rotation", " -math.cos(query.anim_time*360-25)*3 + query.head_y_rotation", 0],
 					"position": [0, "-math.cos(-80+query.anim_time*720)*0.25", 0]
 				}
 			}

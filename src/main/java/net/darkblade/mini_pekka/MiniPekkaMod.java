@@ -156,10 +156,6 @@ public class MiniPekkaMod
             });
         }
 
-        @SubscribeEvent
-        public static void entityAttributeEvent(EntityAttributeCreationEvent event)
-        {
 
-        }
     }
 }
