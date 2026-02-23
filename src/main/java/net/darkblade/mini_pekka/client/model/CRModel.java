@@ -1,7 +1,9 @@
 package net.darkblade.mini_pekka.client.model;
 
-import net.darkblade.mini_pekka.server.entity.MiniPekka;
+import net.darkblade.mini_pekka.server.entity.HeadRotatable;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.TamableAnimal;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.molang.MolangParser;
 import software.bernie.geckolib.model.GeoModel;
@@ -9,7 +11,7 @@ import software.bernie.geckolib.model.GeoModel;
 import static net.darkblade.mini_pekka.constants.CRConstans.HEAD_X_QUERY;
 import static net.darkblade.mini_pekka.constants.CRConstans.HEAD_Y_QUERY;
 
-public abstract class CRModel<T extends MiniPekka> extends GeoModel<T> {
+public abstract class CRModel<T extends TamableAnimal & GeoAnimatable & HeadRotatable> extends GeoModel<T> {
 
     @Override
     public void setCustomAnimations(T animatable, long instanceId, AnimationState<T> animationState) {

@@ -45,7 +45,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.UUID;
 
-public class MiniPekka extends TamableAnimal implements GeoAnimatable {
+public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotatable {
 
     private static final EntityDataAccessor<Boolean> PANCAKES =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
@@ -450,16 +450,12 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         return super.canAttack(target);
     }
 
-    // Hero mode attack durations in ticks: attack=18t (0.875s), attack2=23t (1.1667s)
     private static final int HERO_ATTACK1_DURATION = 18;
     private static final int[] HERO_ATTACK1_DAMAGE = {15};
     private static final int HERO_ATTACK2_DURATION = 23;
     private static final int[] HERO_ATTACK2_DAMAGE = {19};
 
-    /**
-     * Called by SimpleAabbMeleeGoal to get current attack tempo.
-     * Returns {duration, damageFrame1, ...} or null for defaults.
-     */
+
     private int[] getHeroAttackTempo() {
         if (!this.isHeroMode()) return null;
         int idx = this.getAttackIndex();
@@ -477,7 +473,6 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         if (!level().isClientSide && v && !was) {
             this.attackSoundDelay = 10;
         }
-        // Hero mode: alternate attack index when attack ENDS for next attack
         if (!level().isClientSide && !v && was && this.isHeroMode()) {
             this.setAttackIndex(this.getAttackIndex() == 0 ? 1 : 0);
         }

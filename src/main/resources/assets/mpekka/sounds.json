@@ -22,6 +22,18 @@
   "rage.rage_break": {
     "subtitle": "subtitles.rage_break",
     "sounds": [{ "name": "mpekka:rage/rage_break", "volume": 1.0, "pitch": 1.0, "stream": false }]
+  },
+  "entity.pekka.attack": {
+    "subtitle": "subtitles.pekka.attack",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/ana", "volume": 0.6, "pitch": 0.7, "stream": false }]
+  },
+  "entity.pekka.step": {
+    "subtitle": "subtitles.pekka.step",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/step", "volume": 0.6, "pitch": 0.7, "stream": false }]
+  },
+  "entity.pekka.death": {
+    "subtitle": "subtitles.pekka.death",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka/death", "volume": 2.5, "pitch": 0.7, "stream": false }]
   }
 }
 

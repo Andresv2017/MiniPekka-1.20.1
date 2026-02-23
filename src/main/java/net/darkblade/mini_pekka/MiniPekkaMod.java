@@ -3,12 +3,14 @@ import com.mojang.logging.LogUtils;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.darkblade.mini_pekka.client.particles.RageParticle;
 import net.darkblade.mini_pekka.client.particles.ModParticles;
+import net.darkblade.mini_pekka.client.render.PekkaRenderer;
 import net.darkblade.mini_pekka.constants.CRConstans;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.darkblade.mini_pekka.client.render.MiniPekkaRenderer;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.MPekkaEntities;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
+import net.darkblade.mini_pekka.server.entity.Pekka;
 import net.darkblade.mini_pekka.server.items.ModCreativeModeTabs;
 import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
@@ -122,6 +124,7 @@ public class MiniPekkaMod
 
     private void onEntityAttributeCreation(final EntityAttributeCreationEvent event) {
         event.put(MPekkaEntities.MPEKKA.get(), MiniPekka.createAttributes().build());
+        event.put(MPekkaEntities.PEKKA.get(), Pekka.createAttributes().build());
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
@@ -148,6 +151,7 @@ public class MiniPekkaMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             EntityRenderers.register(MPekkaEntities.MPEKKA.get(), MiniPekkaRenderer::new);
+            EntityRenderers.register(MPekkaEntities.PEKKA.get(), PekkaRenderer::new);
             event.enqueueWork(() -> {
                 EntityRenderers.register(
                         MPekkaEntities.RAGE_POTION_PROJECTILE.get(),

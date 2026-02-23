@@ -1,0 +1,314 @@
+package net.darkblade.mini_pekka.server.entity;
+
+import net.darkblade.mini_pekka.server.effect.ModEffects;
+import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
+import net.darkblade.mini_pekka.server.items.ModItems;
+import net.darkblade.mini_pekka.sounds.ModSounds;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.damagesource.DamageSource;
+import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
+import java.util.UUID;
+
+public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable {
+
+    private static final EntityDataAccessor<Boolean> DATA_ATTACKING =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> RAGING =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_STAR_MODE =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
+
+    private static final UUID RAGE_ATTACK_SPEED_UUID =
+            UUID.fromString("ae7eb812-99f4-4e96-b3e4-184c99090c37");
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private boolean wasHurt = false;
+    private int spawnGraceTicks = 30;
+
+    private static final double ATTACK_RANGE = 0.60;
+    private static final double CHASE_SPEED  = 1.4;
+    private static final boolean REQUIRE_LOS = true;
+    private static final int  ATTACK_DURATION = 20;
+    private static final int[] DAMAGE_FRAMES  = {16};
+    private static final int  CD_BASE         = 8;
+
+    private static final SimpleAabbMeleeGoal.AttackHitbox HITBOX =
+            SimpleAabbMeleeGoal.AttackHitbox.of(0.70, 1.50, 1.2, 0.00, 0.30);
+
+    public Pekka(EntityType<? extends TamableAnimal> type, Level level) {
+        super(type, level);
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return TamableAnimal.createLivingAttributes()
+                .add(Attributes.MAX_HEALTH, 200.0)
+                .add(Attributes.FOLLOW_RANGE, 28.0D)
+                .add(Attributes.MOVEMENT_SPEED, 0.18D)
+                .add(Attributes.ATTACK_SPEED, 0.8D)
+                .add(Attributes.ATTACK_KNOCKBACK, 0.8F)
+                .add(Attributes.ATTACK_DAMAGE, 30.0F);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(2, new SimpleAabbMeleeGoal<>(
+                this, ATTACK_RANGE, CHASE_SPEED, REQUIRE_LOS,
+                ATTACK_DURATION, DAMAGE_FRAMES, CD_BASE, HITBOX,
+                this::setAttacking
+        ));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
+    }
+
+    private int attackSoundDelay = -1;
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+
+        if (stack.is(ModItems.STAR_ITEM.get()) && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.isStarMode()) {
+                if (!this.level().isClientSide) {
+                    this.setStarMode(true);
+                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
+                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.FIREWORK,
+                            this.getX(), this.getY() + 0.5D, this.getZ(),
+                            5, 0.2D, 0.2D, 0.2D, 0.1D);
+                    if (!player.getAbilities().instabuild) stack.shrink(1);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+        }
+
+        if (this.isTame() && this.isOwnedBy(player) && stack.isEmpty()) {
+            if (!level().isClientSide) {
+                boolean sit = !this.isOrderedToSit();
+                this.setOrderedToSit(sit);
+                this.setInSittingPose(sit);
+                this.getNavigation().stop();
+                this.setTarget(null);
+            }
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    private float cachedHeadYaw = 0F;
+    private float cachedHeadPitch = 0F;
+
+    @Override public float getCachedHeadYaw() { return cachedHeadYaw; }
+    @Override public void setCachedHeadYaw(float yaw) { this.cachedHeadYaw = yaw; }
+    @Override public float getCachedHeadPitch() { return cachedHeadPitch; }
+    @Override public void setCachedHeadPitch(float pitch) { this.cachedHeadPitch = pitch; }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_ATTACKING, false);
+        this.entityData.define(RAGING, false);
+        this.entityData.define(IS_STAR_MODE, false);
+    }
+
+    public boolean isRaging() { return this.entityData.get(RAGING); }
+    public void setRaging(boolean value) { this.entityData.set(RAGING, value); }
+    public boolean isStarMode() { return this.entityData.get(IS_STAR_MODE); }
+    public void setStarMode(boolean isStar) { this.entityData.set(IS_STAR_MODE, isStar); }
+    public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
+
+    private void setAttacking(boolean v) {
+        boolean was = this.entityData.get(DATA_ATTACKING);
+        this.entityData.set(DATA_ATTACKING, v);
+        if (!level().isClientSide && v && !was) {
+            this.attackSoundDelay = 5;
+        }
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (spawnGraceTicks > 0 && target != null) return;
+        super.setTarget(target);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide) {
+            if (spawnGraceTicks > 0) spawnGraceTicks--;
+
+            boolean hasFury = this.hasEffect(ModEffects.RAGE.get());
+            if (hasFury != this.isRaging()) {
+                this.setRaging(hasFury);
+                this.updateRageAttackSpeed(hasFury);
+            }
+
+            if (this.attackSoundDelay > 0) {
+                this.attackSoundDelay--;
+                if (this.attackSoundDelay == 0) {
+                    float pitch = hasFury ? 0.9f : 0.8f;
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PEKKA_ATTACK.get(), SoundSource.NEUTRAL, 1.0f, pitch);
+                    this.attackSoundDelay = -1;
+                }
+            }
+        }
+    }
+
+    private void updateRageAttackSpeed(boolean raging) {
+        AttributeInstance attr = this.getAttribute(Attributes.ATTACK_SPEED);
+        if (attr == null) return;
+        AttributeModifier existing = attr.getModifier(RAGE_ATTACK_SPEED_UUID);
+        if (existing != null) attr.removeModifier(existing);
+        if (raging) {
+            attr.addTransientModifier(new AttributeModifier(
+                    RAGE_ATTACK_SPEED_UUID, "pekka_rage_attack_speed",
+                    0.3D, AttributeModifier.Operation.MULTIPLY_TOTAL));
+        }
+    }
+
+    private long lastStepSfxTick = -200L;
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!level().isClientSide && this.isAlive() && this.onGround() && !this.isInSittingPose()) {
+            var vel = this.getDeltaMovement();
+            double speed2 = vel.x * vel.x + vel.z * vel.z;
+            if (speed2 > 0.001D) {
+                boolean chasingOrAttacking = this.getTarget() != null || this.isAttacking();
+                int interval = chasingOrAttacking ? 18 : 28;
+                long now = level().getGameTime();
+                if (now - lastStepSfxTick >= interval) {
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PEKKA_STEP.get(), this.getSoundSource(), 0.8F, 0.7F);
+                    lastStepSfxTick = now;
+                }
+            }
+        }
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return ModSounds.PEKKA_DEATH.get();
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (target instanceof Player p && this.isOwnedBy(p)) return false;
+        if (target instanceof TamableAnimal other && this.isTame() && other.isTame()) {
+            UUID me = this.getOwnerUUID();
+            UUID them = other.getOwnerUUID();
+            if (me != null && me.equals(them)) return false;
+        }
+        return super.canAttack(target);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("IsStarMode", this.isStarMode());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.setStarMode(tag.getBoolean("IsStarMode"));
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "controller", 7, this::predicate));
+    }
+
+    @Override
+    protected void tickDeath() {
+        ++this.deathTime;
+        this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+        if (this.deathTime >= 59 && !this.level().isClientSide) {
+            this.remove(RemovalReason.KILLED);
+        }
+    }
+
+    protected <E extends Pekka> PlayState predicate(final AnimationState<E> event) {
+        if (this.deathTime > 0) {
+            event.setAndContinue(RawAnimation.begin().thenPlay("death"));
+            return PlayState.CONTINUE;
+        }
+        if (this.hurtTime > 0 && !this.isDeadOrDying() && !this.isAttacking()) {
+            if (!wasHurt) event.getController().forceAnimationReset();
+            wasHurt = true;
+            event.setAndContinue(RawAnimation.begin().thenPlay("hurt"));
+            return PlayState.CONTINUE;
+        }
+        wasHurt = false;
+        if (this.isInSittingPose()) {
+            event.setAndContinue(RawAnimation.begin().thenLoop("sit"));
+            return PlayState.CONTINUE;
+        }
+        if (this.isAttacking()) {
+            event.setAndContinue(RawAnimation.begin().thenPlay("attack"));
+            return PlayState.CONTINUE;
+        }
+        if (!event.isMoving()) {
+            return event.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+        }
+        return event.setAndContinue(RawAnimation.begin().thenLoop("walk"));
+    }
+
+    @Override
+    public double getTick(Object o) { return tickCount; }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
+
+    @Override
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob mate) { return null; }
+
+    @Override
+    public void onEffectRemoved(MobEffectInstance effect) {
+        super.onEffectRemoved(effect);
+        if (effect.getEffect() == ModEffects.RAGE.get()) updateRageAttackSpeed(false);
+    }
+}
