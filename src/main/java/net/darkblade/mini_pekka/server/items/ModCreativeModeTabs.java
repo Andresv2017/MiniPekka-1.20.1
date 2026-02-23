@@ -24,6 +24,7 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.RAGE_POTION.get());
                         output.accept(ModItems.MP_SPAWN_EGG.get());
                         output.accept(ModItems.STAR_ITEM.get());
+                        output.accept(ModItems.HERO_CRYSTAL.get());
                     })
                     .build());
 

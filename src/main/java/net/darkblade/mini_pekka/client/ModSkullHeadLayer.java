@@ -28,9 +28,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
 
-/**
- * Capa mínima para renderizar la cabeza de Mini Pekka como casco.
- */
 public class ModSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> & HeadedModel>
         extends CustomHeadLayer<T, M> {
 

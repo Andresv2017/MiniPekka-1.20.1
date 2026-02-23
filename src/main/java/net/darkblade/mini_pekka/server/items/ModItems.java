@@ -48,4 +48,7 @@ public class ModItems {
 
     public static final RegistryObject<Item> STAR_ITEM = ITEMS.register("star_item",
             () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HERO_CRYSTAL = ITEMS.register("hero_crystal",
+            () -> new Item(new Item.Properties().rarity(Rarity.EPIC)));
 }

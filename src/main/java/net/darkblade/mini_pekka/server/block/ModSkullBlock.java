@@ -26,7 +26,7 @@ public class ModSkullBlock extends SkullBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return SHAPE; // si la quieres más pequeña, cambia aquí.
+        return SHAPE;
     }
 
     @Override

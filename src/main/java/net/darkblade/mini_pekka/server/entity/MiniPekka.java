@@ -55,6 +55,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_STAR_MODE =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_HERO_MODE =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_INDEX =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
@@ -62,7 +66,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean wasHurt = false;
-    private int spawnGraceTicks = 30; // 1.5s de gracia al spawnear, no perseguir targets heredados
+    private int spawnGraceTicks = 30;
 
     public MiniPekka(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -91,7 +95,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
                 DAMAGE_FRAMES,
                 CD_BASE,
                 HITBOX,
-                this::setAttacking
+                this::setAttacking,
+                this::getHeroAttackTempo
         ));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -110,12 +115,34 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
+        if (stack.is(ModItems.HERO_CRYSTAL.get()) && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.isHeroMode()) {
+                if (!this.level().isClientSide) {
+                    this.setHeroMode(true);
+
+                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.2f, 0.8f);
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+                            this.getX(), this.getY() + 0.5D, this.getZ(),
+                            30, 0.3D, 0.5D, 0.3D, 0.2D);
+
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+        }
+
         if (stack.is(ModItems.STAR_ITEM.get()) && this.isTame() && this.isOwnedBy(player)) {
             if (!this.isStarMode()) {
                 if (!this.level().isClientSide) {
                     this.setStarMode(true);
 
                     this.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
                     ((ServerLevel) this.level()).sendParticles(ParticleTypes.FIREWORK,
                             this.getX(), this.getY() + 0.5D, this.getZ(),
                             5, 0.2D, 0.2D, 0.2D, 0.1D);
@@ -196,6 +223,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         this.entityData.define(DATA_ATTACKING, false);
         this.entityData.define(RAGING, false);
         this.entityData.define(IS_STAR_MODE, false);
+        this.entityData.define(IS_HERO_MODE, false);
+        this.entityData.define(ATTACK_INDEX, 0);
     }
 
     public boolean hasPancakesSkin() {
@@ -213,6 +242,14 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
     public boolean isStarMode() {return this.entityData.get(IS_STAR_MODE);}
 
     public void setStarMode(boolean isStar) {this.entityData.set(IS_STAR_MODE, isStar);}
+
+    public boolean isHeroMode() { return this.entityData.get(IS_HERO_MODE); }
+
+    public void setHeroMode(boolean hero) { this.entityData.set(IS_HERO_MODE, hero); }
+
+    public int getAttackIndex() { return this.entityData.get(ATTACK_INDEX); }
+
+    public void setAttackIndex(int index) { this.entityData.set(ATTACK_INDEX, index); }
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -237,7 +274,6 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        // Durante el periodo de gracia post-spawn, bloquear TODOS los targets nuevos
         if (spawnGraceTicks > 0 && target != null) {
             return;
         }
@@ -250,7 +286,6 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
 
         if (!level().isClientSide) {
             if (spawnGraceTicks > 0) spawnGraceTicks--;
-            // Scoreboard tag "pancakes" puede activar el skin en cualquier momento
             if (!this.hasPancakesSkin() && hasScoreboardPancakes()) {
                 this.setPancakesSkin(true);
             }
@@ -336,6 +371,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         tag.putBoolean("HasPancakesSkin", this.hasPancakesSkin());
         tag.putLong("LastPancakeSfx", this.lastPancakeSfxTick);
         tag.putBoolean("IsStarMode", this.isStarMode());
+        tag.putBoolean("IsHeroMode", this.isHeroMode());
     }
 
     @Override
@@ -344,13 +380,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         if (tag.contains("HasPancakesSkin")) this.setPancakesSkin(tag.getBoolean("HasPancakesSkin"));
         if (tag.contains("LastPancakeSfx")) this.lastPancakeSfxTick = tag.getLong("LastPancakeSfx");
         this.setStarMode(tag.getBoolean("IsStarMode"));
+        this.setHeroMode(tag.getBoolean("IsHeroMode"));
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "HurtController", 2, this::hurtPredicate));
         AnimationController<MiniPekka> controller =
-                new AnimationController<>(this, "controller", 10, this::predicate);
+                new AnimationController<>(this, "controller", 7, this::predicate);
         controllers.add(controller);
     }
 
@@ -372,34 +408,27 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
             return PlayState.CONTINUE;
         }
         if (this.hurtTime > 0 && !this.isDeadOrDying() && !this.isAttacking()) {
-            return PlayState.STOP;
+            if (!wasHurt) {
+                event.getController().forceAnimationReset();
+            }
+            wasHurt = true;
+            event.setAndContinue(RawAnimation.begin().thenPlay("hurt"));
+            return PlayState.CONTINUE;
         }
+        wasHurt = false;
         if (this.isInSittingPose()) {
             event.setAndContinue(RawAnimation.begin().thenLoop("sit"));
             return PlayState.CONTINUE;
         }
         if (this.isAttacking()) {
-            event.setAndContinue(RawAnimation.begin().thenPlay("attack"));
+            String attackAnim = (this.isHeroMode() && this.getAttackIndex() == 1) ? "attack2" : "attack";
+            event.setAndContinue(RawAnimation.begin().thenPlay(attackAnim));
             return PlayState.CONTINUE;
         }
         if (!event.isMoving()) {
             return event.setAndContinue(RawAnimation.begin().thenLoop("idle"));
         }
         return event.setAndContinue(RawAnimation.begin().thenLoop("walk"));
-    }
-
-    private PlayState hurtPredicate(AnimationState<MiniPekka> event) {
-        if (this.hurtTime > 0 && !this.isDeadOrDying() && !this.isAttacking()) {
-            if (!wasHurt) {
-                event.getController().forceAnimationReset();
-            }
-            event.getController().setAnimation(RawAnimation.begin().thenPlay("hurt"));
-            wasHurt = true;
-            return PlayState.CONTINUE;
-        }
-
-        wasHurt = false;
-        return PlayState.STOP;
     }
 
     @Override
@@ -421,12 +450,36 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable {
         return super.canAttack(target);
     }
 
+    // Hero mode attack durations in ticks: attack=18t (0.875s), attack2=23t (1.1667s)
+    private static final int HERO_ATTACK1_DURATION = 18;
+    private static final int[] HERO_ATTACK1_DAMAGE = {15};
+    private static final int HERO_ATTACK2_DURATION = 23;
+    private static final int[] HERO_ATTACK2_DAMAGE = {19};
+
+    /**
+     * Called by SimpleAabbMeleeGoal to get current attack tempo.
+     * Returns {duration, damageFrame1, ...} or null for defaults.
+     */
+    private int[] getHeroAttackTempo() {
+        if (!this.isHeroMode()) return null;
+        int idx = this.getAttackIndex();
+        if (idx == 0) {
+            return new int[]{HERO_ATTACK1_DURATION, HERO_ATTACK1_DAMAGE[0]};
+        } else {
+            return new int[]{HERO_ATTACK2_DURATION, HERO_ATTACK2_DAMAGE[0]};
+        }
+    }
+
     private void setAttacking(boolean v) {
         boolean was = this.entityData.get(DATA_ATTACKING);
         this.entityData.set(DATA_ATTACKING, v);
 
         if (!level().isClientSide && v && !was) {
             this.attackSoundDelay = 10;
+        }
+        // Hero mode: alternate attack index when attack ENDS for next attack
+        if (!level().isClientSide && !v && was && this.isHeroMode()) {
+            this.setAttackIndex(this.getAttackIndex() == 0 ? 1 : 0);
         }
     }
 

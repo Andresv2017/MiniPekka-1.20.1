@@ -9,6 +9,9 @@ public class MiniPekkaModel extends CRModel<MiniPekka> {
 
     @Override
     public ResourceLocation getModelResource(MiniPekka miniPekka) {
+        if (miniPekka.isHeroMode()) {
+            return new ResourceLocation(MiniPekkaMod.MODID, "geo/entity/mini_pk_hero.geo.json");
+        }
         return new ResourceLocation(MiniPekkaMod.MODID, "geo/entity/mini_pk.geo.json");
     }
 
@@ -16,6 +19,13 @@ public class MiniPekkaModel extends CRModel<MiniPekka> {
     public ResourceLocation getTextureResource(MiniPekka animatable) {
         boolean isPancake = animatable.hasPancakesSkin();
         boolean isStar = animatable.isStarMode();
+        boolean isHero = animatable.isHeroMode();
+
+        if (isHero) {
+            return isPancake
+                    ? new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_hero_pancake.png")
+                    : new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_hero.png");
+        }
 
         if (isStar && isPancake) {
             return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_star_pancake.png");
@@ -30,6 +40,9 @@ public class MiniPekkaModel extends CRModel<MiniPekka> {
 
     @Override
     public ResourceLocation getAnimationResource(MiniPekka miniPekka) {
-        return new ResourceLocation(MiniPekkaMod.MODID,"animations/entity/mini_pk.animation.json");
+        if (miniPekka.isHeroMode()) {
+            return new ResourceLocation(MiniPekkaMod.MODID, "animations/entity/mini_pk_hero.animation.json");
+        }
+        return new ResourceLocation(MiniPekkaMod.MODID, "animations/entity/mini_pk.animation.json");
     }
 }
