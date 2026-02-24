@@ -11,6 +11,7 @@ public class MiniPekkaRenderer extends GeoEntityRenderer<MiniPekka> {
     public MiniPekkaRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new MiniPekkaModel());
         this.addRenderLayer(new MiniPekkaRageEffectLayer(this));
+        this.addRenderLayer(new MiniPekkaHeroChargeLayer(this));
     }
 
     @Override

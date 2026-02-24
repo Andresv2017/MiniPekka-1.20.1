@@ -14,8 +14,12 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
 
-    private static final ResourceLocation RAGE_TEXTURE =
+    private static final ResourceLocation OVERLAY_DEFAULT =
             new ResourceLocation("mpekka", "textures/entity/pekka_rage_overlay.png");
+    private static final ResourceLocation OVERLAY_STAR =
+            new ResourceLocation("mpekka", "textures/entity/pekka_star_overlay.png");
+    private static final ResourceLocation OVERLAY_EVO =
+            new ResourceLocation("mpekka", "textures/entity/pekka_evo_overlay.png");
 
     private static final float R = 0.7F;
     private static final float G = 0.3F;
@@ -25,6 +29,12 @@ public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
 
     public PekkaRageEffectLayer(GeoRenderer<Pekka> entityRenderer) {
         super(entityRenderer);
+    }
+
+    private ResourceLocation getOverlayTexture(Pekka animatable) {
+        if (animatable.isEvoMode()) return OVERLAY_EVO;
+        if (animatable.isStarMode()) return OVERLAY_STAR;
+        return OVERLAY_DEFAULT;
     }
 
     @Override
@@ -47,7 +57,8 @@ public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
 
         float currentAlpha = ALPHA_BASE * (0.6F + pulseFactor * 0.4F);
 
-        RenderType rageRenderType = RenderType.entityTranslucentEmissive(RAGE_TEXTURE);
+        ResourceLocation overlayTex = getOverlayTexture(animatable);
+        RenderType rageRenderType = RenderType.entityTranslucentEmissive(overlayTex);
 
         this.getRenderer().reRender(
                 bakedModel,

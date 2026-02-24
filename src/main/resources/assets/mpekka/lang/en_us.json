@@ -7,9 +7,12 @@
   "item.mpekka.pancake": "Pancake",
   "item.mpekka.mk_spawn_egg": "Mini Pekka Spawn Egg",
   "entity.mpekka.m_pk": "Mini Pekka",
+  "entity.mpekka.pekka": "P.E.K.K.A",
   "item.mpekka.pk_sword": "Mini Pekka Sword",
   "item.mpekka.rage_potion": "Rage Potion",
   "effect.mpekka.rage": "Rage",
   "item.mpekka.hero_crystal": "Hero Crystal",
+  "item.mpekka.evo_crystal": "Evolution Crystal",
+  "item.mpekka.pekka_spawn_egg": "P.E.K.K.A Spawn Egg",
   "creativetab.mpekka_tab": "P.E.K.K.A. Craft"
 }

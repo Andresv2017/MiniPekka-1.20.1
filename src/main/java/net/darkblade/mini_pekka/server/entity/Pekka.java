@@ -52,6 +52,10 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_STAR_MODE =
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_EVO_MODE =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> ATTACK_INDEX =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("ae7eb812-99f4-4e96-b3e4-184c99090c37");
@@ -60,15 +64,15 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     private boolean wasHurt = false;
     private int spawnGraceTicks = 30;
 
-    private static final double ATTACK_RANGE = 0.60;
+    private static final double ATTACK_RANGE = 1.20;
     private static final double CHASE_SPEED  = 1.4;
     private static final boolean REQUIRE_LOS = true;
     private static final int  ATTACK_DURATION = 20;
     private static final int[] DAMAGE_FRAMES  = {16};
-    private static final int  CD_BASE         = 8;
+    private static final int  CD_BASE         = 0;
 
     private static final SimpleAabbMeleeGoal.AttackHitbox HITBOX =
-            SimpleAabbMeleeGoal.AttackHitbox.of(0.70, 1.50, 1.2, 0.00, 0.30);
+            SimpleAabbMeleeGoal.AttackHitbox.of(1.15, 2.00, 1.5, 0.00, 0.0);
 
     public Pekka(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -91,7 +95,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         this.goalSelector.addGoal(2, new SimpleAabbMeleeGoal<>(
                 this, ATTACK_RANGE, CHASE_SPEED, REQUIRE_LOS,
                 ATTACK_DURATION, DAMAGE_FRAMES, CD_BASE, HITBOX,
-                this::setAttacking
+                this::setAttacking,
+                this::getEvoAttackTempo
         ));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -107,6 +112,20 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+
+        if (stack.is(ModItems.EVO_CRYSTAL.get()) && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.isEvoMode()) {
+                if (!this.level().isClientSide) {
+                    this.setEvoMode(true);
+                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.2f, 0.8f);
+                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+                            this.getX(), this.getY() + 0.5D, this.getZ(),
+                            30, 0.3D, 0.5D, 0.3D, 0.2D);
+                    if (!player.getAbilities().instabuild) stack.shrink(1);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+        }
 
         if (stack.is(ModItems.STAR_ITEM.get()) && this.isTame() && this.isOwnedBy(player)) {
             if (!this.isStarMode()) {
@@ -150,12 +169,18 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         this.entityData.define(DATA_ATTACKING, false);
         this.entityData.define(RAGING, false);
         this.entityData.define(IS_STAR_MODE, false);
+        this.entityData.define(IS_EVO_MODE, false);
+        this.entityData.define(ATTACK_INDEX, 0);
     }
 
     public boolean isRaging() { return this.entityData.get(RAGING); }
     public void setRaging(boolean value) { this.entityData.set(RAGING, value); }
     public boolean isStarMode() { return this.entityData.get(IS_STAR_MODE); }
     public void setStarMode(boolean isStar) { this.entityData.set(IS_STAR_MODE, isStar); }
+    public boolean isEvoMode() { return this.entityData.get(IS_EVO_MODE); }
+    public void setEvoMode(boolean evo) { this.entityData.set(IS_EVO_MODE, evo); }
+    public int getAttackIndex() { return this.entityData.get(ATTACK_INDEX); }
+    public void setAttackIndex(int index) { this.entityData.set(ATTACK_INDEX, index); }
     public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
     private void setAttacking(boolean v) {
@@ -249,12 +274,14 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("IsStarMode", this.isStarMode());
+        tag.putBoolean("IsEvoMode", this.isEvoMode());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.setStarMode(tag.getBoolean("IsStarMode"));
+        this.setEvoMode(tag.getBoolean("IsEvoMode"));
     }
 
     @Override
@@ -295,6 +322,14 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             return event.setAndContinue(RawAnimation.begin().thenLoop("idle"));
         }
         return event.setAndContinue(RawAnimation.begin().thenLoop("walk"));
+    }
+
+    private static final int EVO_ATTACK_DURATION = 20;
+    private static final int[] EVO_ATTACK_DAMAGE = {16};
+
+    private int[] getEvoAttackTempo() {
+        if (!this.isEvoMode()) return null;
+        return new int[]{EVO_ATTACK_DURATION, EVO_ATTACK_DAMAGE[0]};
     }
 
     @Override

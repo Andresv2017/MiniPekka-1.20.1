@@ -68,12 +68,17 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private int failedPathFindingPenalty = 0;
     private boolean canPenalize = true;
 
-    private static final int RECALC_BASE_MIN = 2;
-    private static final int RECALC_BASE_MAX = 4;
+    private static final int RECALC_BASE_MIN = 4;
+    private static final int RECALC_BASE_MAX = 8;
+    private static final int RECALC_CLOSE_MIN = 8;
+    private static final int RECALC_CLOSE_MAX = 12;
+    private static final double CLOSE_RANGE_SQ = 9.0;
     private static final int FAILED_PENALTY_MAX = 20;
 
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_AABB = false;
+    private float attackLockedYaw = 0F;
+
+    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_AABB = true;
     private static final boolean DEBUG_HUD = false;
 
     private int dbgNextSendTick = 0;
@@ -176,53 +181,66 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
 
         if (target == null) { setAttackActive(false); return; }
 
-        mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
-
         final double d3 = mob.distanceToSqr(target.getX(), target.getY(), target.getZ());
-
         final boolean inEdgeRange = isInAttackRangeEdgeXZ(target);
+
+        // --- LOOK CONTROL: suave durante ataque, normal durante persecución ---
+        if (active) {
+            // Durante el ataque: solo girar la cabeza muy suavemente, no el cuerpo
+            mob.getLookControl().setLookAt(target, 8.0F, 8.0F);
+        } else {
+            mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
 
         this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
         final boolean hasLOS = !REQUIRE_LOS || mob.getSensing().hasLineOfSight(target);
 
-        if (this.ticksUntilNextPathRecalculation <= 0 &&
-                (this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0
-                        || target.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0
-                        || mob.getRandom().nextFloat() < 0.05F)) {
+        // --- NAVEGACIÓN: solo cuando NO está atacando ---
+        if (!active) {
+            if (this.ticksUntilNextPathRecalculation <= 0 &&
+                    (this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0
+                            || target.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0
+                            || mob.getRandom().nextFloat() < 0.05F)) {
 
-            this.pathedTargetX = target.getX();
-            this.pathedTargetY = target.getY();
-            this.pathedTargetZ = target.getZ();
+                this.pathedTargetX = target.getX();
+                this.pathedTargetY = target.getY();
+                this.pathedTargetZ = target.getZ();
 
-            this.ticksUntilNextPathRecalculation = RECALC_BASE_MIN + mob.getRandom().nextInt(RECALC_BASE_MAX - RECALC_BASE_MIN + 1);
+                // Intervalo adaptativo: más lento cerca del target para evitar giros
+                if (d3 < CLOSE_RANGE_SQ) {
+                    this.ticksUntilNextPathRecalculation = RECALC_CLOSE_MIN + mob.getRandom().nextInt(RECALC_CLOSE_MAX - RECALC_CLOSE_MIN + 1);
+                } else {
+                    this.ticksUntilNextPathRecalculation = RECALC_BASE_MIN + mob.getRandom().nextInt(RECALC_BASE_MAX - RECALC_BASE_MIN + 1);
+                }
 
-            if (this.canPenalize) {
-                this.ticksUntilNextPathRecalculation += this.failedPathFindingPenalty;
-                if (mob.getNavigation().getPath() != null) {
-                    Node end = mob.getNavigation().getPath().getEndNode();
-                    if (end != null && target.distanceToSqr(end.x, end.y, end.z) < 1.0) {
-                        this.failedPathFindingPenalty = 0;
+                if (this.canPenalize) {
+                    this.ticksUntilNextPathRecalculation += this.failedPathFindingPenalty;
+                    if (mob.getNavigation().getPath() != null) {
+                        Node end = mob.getNavigation().getPath().getEndNode();
+                        if (end != null && target.distanceToSqr(end.x, end.y, end.z) < 1.0) {
+                            this.failedPathFindingPenalty = 0;
+                        } else {
+                            this.failedPathFindingPenalty = Math.min(this.failedPathFindingPenalty + 10, FAILED_PENALTY_MAX);
+                        }
                     } else {
                         this.failedPathFindingPenalty = Math.min(this.failedPathFindingPenalty + 10, FAILED_PENALTY_MAX);
                     }
-                } else {
-                    this.failedPathFindingPenalty = Math.min(this.failedPathFindingPenalty + 10, FAILED_PENALTY_MAX);
                 }
+
+                if (d3 > 1024.0) this.ticksUntilNextPathRecalculation += 10;
+                else if (d3 > 256.0) this.ticksUntilNextPathRecalculation += 5;
+
+                if (!mob.getNavigation().moveTo(target, CHASE_SPEED)) {
+                    this.ticksUntilNextPathRecalculation += 8;
+                }
+
+                this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
             }
 
-            if (d3 > 1024.0) this.ticksUntilNextPathRecalculation += 10;
-            else if (d3 > 256.0) this.ticksUntilNextPathRecalculation += 5;
-
-            if (!mob.getNavigation().moveTo(target, CHASE_SPEED)) {
-                mob.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), CHASE_SPEED);
-                this.ticksUntilNextPathRecalculation += 8;
+            // Fallback solo si realmente no tiene path y no está cerca
+            if ((mob.getNavigation().isDone() || mob.getNavigation().getPath() == null) && !inEdgeRange && d3 > CLOSE_RANGE_SQ) {
+                mob.getNavigation().moveTo(target, CHASE_SPEED);
             }
-
-            this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
-        }
-
-        if ((mob.getNavigation().isDone() || mob.getNavigation().getPath() == null) && !inEdgeRange) {
-            mob.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), CHASE_SPEED);
         }
 
         this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
@@ -245,10 +263,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
                     hasLOS ? "true" : "false", this.ticksUntilNextAttack,
                     active ? "true" : "false", mob.getNavigation().isDone() ? "true" : "false"
             );
-        }
-
-        if (active && !inEdgeRange) {
-            mob.getNavigation().moveTo(target, CHASE_SPEED);
         }
 
         if (!mob.level().isClientSide) {
@@ -283,6 +297,22 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
     private void startAttack() {
         refreshAttackTempos();
         tick = 0;
+
+        // Fijar la rotación del cuerpo hacia el target al iniciar el ataque
+        LivingEntity target = mob.getTarget();
+        if (target != null) {
+            double dx = target.getX() - mob.getX();
+            double dz = target.getZ() - mob.getZ();
+            float desiredYaw = (float)(Mth.atan2(dz, dx) * (180D / Math.PI)) - 90.0F;
+            mob.setYRot(desiredYaw);
+            mob.yBodyRot = desiredYaw;
+            mob.setYHeadRot(desiredYaw);
+            this.attackLockedYaw = desiredYaw;
+        }
+
+        // Detener la navegación para que no compita con la animación de ataque
+        mob.getNavigation().stop();
+
         setAttackActive(true);
         attackStartTimeTick = mob.tickCount;
         double speed = computeAttackSpeedScale();

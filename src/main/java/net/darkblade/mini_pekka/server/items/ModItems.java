@@ -51,4 +51,10 @@ public class ModItems {
 
     public static final RegistryObject<Item> HERO_CRYSTAL = ITEMS.register("hero_crystal",
             () -> new Item(new Item.Properties().rarity(Rarity.EPIC)));
+
+    public static final RegistryObject<Item> EVO_CRYSTAL = ITEMS.register("evo_crystal",
+            () -> new Item(new Item.Properties().rarity(Rarity.EPIC)));
+
+    public static final RegistryObject<Item> PEKKA_SPAWN_EGG = ITEMS.register("pekka_spawn_egg",
+            () -> new ForgeSpawnEggItem(MPekkaEntities.PEKKA, 0x2d446a, 0xc363c5, new Item.Properties()));
 }

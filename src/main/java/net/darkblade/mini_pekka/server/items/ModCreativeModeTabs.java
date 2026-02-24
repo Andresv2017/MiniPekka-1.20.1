@@ -23,8 +23,10 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.PANCAKE.get());
                         output.accept(ModItems.RAGE_POTION.get());
                         output.accept(ModItems.MP_SPAWN_EGG.get());
+                        output.accept(ModItems.PEKKA_SPAWN_EGG.get());
                         output.accept(ModItems.STAR_ITEM.get());
                         output.accept(ModItems.HERO_CRYSTAL.get());
+                        output.accept(ModItems.EVO_CRYSTAL.get());
                     })
                     .build());
 

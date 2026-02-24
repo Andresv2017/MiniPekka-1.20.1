@@ -17,10 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -59,9 +56,21 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> ATTACK_INDEX =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> HERO_CHARGE =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> HERO_ABILITY_ACTIVE =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
+    private static final UUID HERO_DAMAGE_BOOST_UUID =
+            UUID.fromString("c3a1d7e5-9b2f-4a8c-b6d4-3e7f1a2c5d80");
+
+    public static final int HERO_CHARGE_MAX = 6;
+    private static final int HERO_ABILITY_DURATION_TICKS = 600;
+    private static final float HERO_HEAL_PERCENT = 0.40F;
+    private static final double HERO_DAMAGE_MULTIPLIER = 0.50D;
+    private int heroAbilityTicksRemaining = 0;
 
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -156,6 +165,33 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         }
 
         if (stack.is(ModItems.PANCAKE.get()) && this.isTame() && this.isOwnedBy(player)) {
+            if (this.isHeroMode() && this.isHeroChargeReady() && !this.isHeroAbilityActive()) {
+                if (!level().isClientSide) {
+                    float healAmount = this.getMaxHealth() * HERO_HEAL_PERCENT;
+                    this.heal(healAmount);
+
+                    this.setHeroAbilityActive(true);
+                    this.heroAbilityTicksRemaining = HERO_ABILITY_DURATION_TICKS;
+                    this.applyHeroDamageBoost(true);
+
+                    this.setHeroCharge(0);
+
+                    this.playSound(SoundEvents.TOTEM_USE, 1.0f, 1.2f);
+                    ((ServerLevel) level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+                            getX(), getY() + getBbHeight() * 0.5D, getZ(),
+                            30, 0.4D, 0.6D, 0.4D, 0.2D);
+                    ((ServerLevel) level()).sendParticles(ParticleTypes.HEART,
+                            getX(), getY() + getBbHeight() * 0.6D, getZ(),
+                            10, 0.3D, 0.3D, 0.3D, 0.02D);
+
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide);
+            }
+
+            // Normal pancake healing
             if (this.getHealth() < this.getMaxHealth()) {
                 if (!level().isClientSide) {
                     float healAmount = 6.0F;
@@ -225,6 +261,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.entityData.define(IS_STAR_MODE, false);
         this.entityData.define(IS_HERO_MODE, false);
         this.entityData.define(ATTACK_INDEX, 0);
+        this.entityData.define(HERO_CHARGE, 0);
+        this.entityData.define(HERO_ABILITY_ACTIVE, false);
     }
 
     public boolean hasPancakesSkin() {
@@ -250,6 +288,12 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     public int getAttackIndex() { return this.entityData.get(ATTACK_INDEX); }
 
     public void setAttackIndex(int index) { this.entityData.set(ATTACK_INDEX, index); }
+
+    public int getHeroCharge() { return this.entityData.get(HERO_CHARGE); }
+    public void setHeroCharge(int charge) { this.entityData.set(HERO_CHARGE, Math.min(charge, HERO_CHARGE_MAX)); }
+    public boolean isHeroChargeReady() { return this.getHeroCharge() >= HERO_CHARGE_MAX; }
+    public boolean isHeroAbilityActive() { return this.entityData.get(HERO_ABILITY_ACTIVE); }
+    public void setHeroAbilityActive(boolean active) { this.entityData.set(HERO_ABILITY_ACTIVE, active); }
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -305,6 +349,16 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                     this.attackSoundDelay = -1;
                 }
             }
+
+            if (this.isHeroAbilityActive()) {
+                this.heroAbilityTicksRemaining--;
+                if (this.heroAbilityTicksRemaining <= 0) {
+                    this.setHeroAbilityActive(false);
+                    this.applyHeroDamageBoost(false);
+                    this.setHeroCharge(0);
+                    this.playSound(SoundEvents.BEACON_DEACTIVATE, 0.6f, 1.0f);
+                }
+            }
         }
     }
 
@@ -324,6 +378,23 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                     RAGE_ATTACK_SPEED_UUID,
                     "mini_pekka_rage_attack_speed",
                     0.3D,
+                    AttributeModifier.Operation.MULTIPLY_TOTAL
+            ));
+        }
+    }
+
+    private void applyHeroDamageBoost(boolean activate) {
+        AttributeInstance attr = this.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (attr == null) return;
+
+        AttributeModifier existing = attr.getModifier(HERO_DAMAGE_BOOST_UUID);
+        if (existing != null) attr.removeModifier(existing);
+
+        if (activate) {
+            attr.addTransientModifier(new AttributeModifier(
+                    HERO_DAMAGE_BOOST_UUID,
+                    "hero_damage_boost",
+                    HERO_DAMAGE_MULTIPLIER,
                     AttributeModifier.Operation.MULTIPLY_TOTAL
             ));
         }
@@ -372,6 +443,9 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         tag.putLong("LastPancakeSfx", this.lastPancakeSfxTick);
         tag.putBoolean("IsStarMode", this.isStarMode());
         tag.putBoolean("IsHeroMode", this.isHeroMode());
+        tag.putInt("HeroCharge", this.getHeroCharge());
+        tag.putBoolean("HeroAbilityActive", this.isHeroAbilityActive());
+        tag.putInt("HeroAbilityTicksRemaining", this.heroAbilityTicksRemaining);
     }
 
     @Override
@@ -381,6 +455,11 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         if (tag.contains("LastPancakeSfx")) this.lastPancakeSfxTick = tag.getLong("LastPancakeSfx");
         this.setStarMode(tag.getBoolean("IsStarMode"));
         this.setHeroMode(tag.getBoolean("IsHeroMode"));
+        this.setHeroCharge(tag.getInt("HeroCharge"));
+        boolean abilityActive = tag.getBoolean("HeroAbilityActive");
+        this.setHeroAbilityActive(abilityActive);
+        this.heroAbilityTicksRemaining = tag.getInt("HeroAbilityTicksRemaining");
+        if (abilityActive) this.applyHeroDamageBoost(true);
     }
 
     @Override
@@ -450,6 +529,24 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         return super.canAttack(target);
     }
 
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        if (hit && !level().isClientSide && this.isHeroMode()
+                && !this.isHeroAbilityActive() && !this.isHeroChargeReady()) {
+            this.setHeroCharge(this.getHeroCharge() + 1);
+            if (this.isHeroChargeReady()) {
+                this.playSound(SoundEvents.PLAYER_LEVELUP, 0.8f, 1.5f);
+                if (level() instanceof ServerLevel sl) {
+                    sl.sendParticles(ParticleTypes.ENCHANT,
+                            getX(), getY() + getBbHeight() + 0.3D, getZ(),
+                            15, 0.2D, 0.1D, 0.2D, 0.05D);
+                }
+            }
+        }
+        return hit;
+    }
+
     private static final int HERO_ATTACK1_DURATION = 18;
     private static final int[] HERO_ATTACK1_DAMAGE = {15};
     private static final int HERO_ATTACK2_DURATION = 23;
@@ -480,7 +577,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
-    private static final double ATTACK_RANGE = 0.50;
+    private static final double ATTACK_RANGE = 1.20;
     private static final double CHASE_SPEED  = 1.6;
     private static final boolean REQUIRE_LOS = true;
 
@@ -490,11 +587,11 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     private static final SimpleAabbMeleeGoal.AttackHitbox HITBOX =
             SimpleAabbMeleeGoal.AttackHitbox.of(
-                    0.50,
+                    0.85,
                     1.00,
-                    1.0,
+                    1.5,
                     0.00,
-                    0.30
+                    0.00
             );
 
     @Override
