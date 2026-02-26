@@ -64,7 +64,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     private boolean wasHurt = false;
     private int spawnGraceTicks = 30;
 
-    private static final double ATTACK_RANGE = 1.20;
+    private static final double ATTACK_RANGE = 1.40;
     private static final double CHASE_SPEED  = 1.4;
     private static final boolean REQUIRE_LOS = true;
     private static final int  ATTACK_DURATION = 20;

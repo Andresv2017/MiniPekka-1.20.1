@@ -577,7 +577,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
 
-    private static final double ATTACK_RANGE = 1.20;
+    private static final double ATTACK_RANGE = 1.40;
     private static final double CHASE_SPEED  = 1.6;
     private static final boolean REQUIRE_LOS = true;
 

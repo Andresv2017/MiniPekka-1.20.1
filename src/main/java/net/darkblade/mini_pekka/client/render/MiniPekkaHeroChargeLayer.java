@@ -22,11 +22,11 @@ public class MiniPekkaHeroChargeLayer extends GeoRenderLayer<MiniPekka> {
 
     private static final float BG_R = 0.15F, BG_G = 0.15F, BG_B = 0.15F, BG_A = 0.7F;
 
-    private static final float CHARGE_R = 0.2F, CHARGE_G = 0.8F, CHARGE_B = 1.0F, CHARGE_A = 0.9F;
+    private static final float CHARGE_R = 1.0F, CHARGE_G = 0.85F, CHARGE_B = 0.1F, CHARGE_A = 0.9F;
 
-    private static final float READY_R = 1.0F, READY_G = 0.85F, READY_B = 0.2F;
+    private static final float READY_R = 1.0F, READY_G = 0.65F, READY_B = 0.1F;
 
-    private static final float ACTIVE_R = 1.0F, ACTIVE_G = 0.6F, ACTIVE_B = 0.1F, ACTIVE_A = 0.95F;
+    private static final float ACTIVE_R = 1.0F, ACTIVE_G = 0.1F, ACTIVE_B = 0.1F, ACTIVE_A = 0.95F;
 
     public MiniPekkaHeroChargeLayer(GeoRenderer<MiniPekka> renderer) {
         super(renderer);
@@ -56,19 +56,23 @@ public class MiniPekkaHeroChargeLayer extends GeoRenderLayer<MiniPekka> {
         if (abilityActive) {
             fillPercent = 1.0F;
             float time = (float) animatable.tickCount + partialTick;
-            float pulse = (float) (Math.sin(time * 0.3F) + 1.0F) * 0.5F;
-            r = ACTIVE_R;
-            g = ACTIVE_G * (0.8F + pulse * 0.2F);
-            b = ACTIVE_B;
-            a = ACTIVE_A;
+            float pulse = (float) (Math.sin(time * 0.45F) + 1.0F) * 0.5F;
+
+            r = ACTIVE_R * (0.6F + pulse * 0.4F);
+            g = ACTIVE_G * pulse;
+            b = ACTIVE_B * pulse;
+            a = 0.5F + pulse * 0.5F;
+
         } else if (charge >= MiniPekka.HERO_CHARGE_MAX) {
             fillPercent = 1.0F;
             float time = (float) animatable.tickCount + partialTick;
-            float pulse = (float) (Math.sin(time * 0.4F) + 1.0F) * 0.5F;
+            float pulse = (float) (Math.sin(time * 0.5F) + 1.0F) * 0.5F;
+
             r = READY_R;
-            g = READY_G * (0.7F + pulse * 0.3F);
-            b = READY_B * (0.5F + pulse * 0.5F);
-            a = 0.85F + pulse * 0.15F;
+            g = READY_G * (0.4F + pulse * 0.6F);
+            b = READY_B * (0.2F + pulse * 0.8F);
+            a = 0.5F + pulse * 0.5F;
+
         } else {
             fillPercent = (float) charge / MiniPekka.HERO_CHARGE_MAX;
             r = CHARGE_R;
