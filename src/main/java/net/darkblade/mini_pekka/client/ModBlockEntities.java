@@ -18,7 +18,9 @@ public class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                                     ModSkullBlockEntity::new,
                                     ModBlocks.MINI_PK_HEAD.get(),
-                                    ModBlocks.MINI_PK_WALL_HEAD.get()
+                                    ModBlocks.MINI_PK_WALL_HEAD.get(),
+                                    ModBlocks.PEKKA_HEAD.get(),
+                                    ModBlocks.PEKKA_WALL_HEAD.get()
                             )
                             .build(null)
             );

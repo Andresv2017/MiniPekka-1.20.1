@@ -55,6 +55,15 @@ public class ModItems {
     public static final RegistryObject<Item> EVO_CRYSTAL = ITEMS.register("evo_crystal",
             () -> new Item(new Item.Properties().rarity(Rarity.EPIC)));
 
+    public static final RegistryObject<Item> PEKKA_HEAD = ITEMS.register("pekka_head", () ->
+            new PekkaHeadItem(
+                    ModBlocks.PEKKA_HEAD.get(),
+                    ModBlocks.PEKKA_WALL_HEAD.get(),
+                    new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant(),
+                    Direction.DOWN
+            )
+    );
+
     public static final RegistryObject<Item> PEKKA_SPAWN_EGG = ITEMS.register("pekka_spawn_egg",
             () -> new ForgeSpawnEggItem(MPekkaEntities.PEKKA, 0x2d446a, 0xc363c5, new Item.Properties()));
 }

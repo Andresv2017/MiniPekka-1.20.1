@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.client.ModSkullHeadLayer;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.darkblade.mini_pekka.client.ModBlockEntityModelLayers;
 import net.darkblade.mini_pekka.client.model.MiniPekkaHeadModel;
+import net.darkblade.mini_pekka.client.model.PekkaHeadModel;
 import net.darkblade.mini_pekka.server.block.ModSkullBlock;
 import net.darkblade.mini_pekka.server.items.ModSkullItem;
 import net.darkblade.mini_pekka.server.entity.MiniPekka;
@@ -62,14 +63,21 @@ public class ClientEvents {
             @SubscribeEvent
             public static void registerLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
                 event.registerLayerDefinition(ModBlockEntityModelLayers.MINI_PK_HEAD, MiniPekkaHeadModel::createMiniPekkaHeadLayer);
+                event.registerLayerDefinition(ModBlockEntityModelLayers.PEKKA_HEAD, PekkaHeadModel::createPekkaHeadLayer);
             }
 
             @SubscribeEvent
             public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels event) {
-                var baked = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD);
+                var bakedMini = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD);
                 event.registerSkullModel(
                         ModSkullBlock.Types.MINI_PEKKA,
-                        new net.minecraft.client.model.SkullModel(baked)
+                        new net.minecraft.client.model.SkullModel(bakedMini)
+                );
+
+                var bakedPekka = event.getEntityModelSet().bakeLayer(ModBlockEntityModelLayers.PEKKA_HEAD);
+                event.registerSkullModel(
+                        ModSkullBlock.Types.PEKKA,
+                        new net.minecraft.client.model.SkullModel(bakedPekka)
                 );
             }
 

@@ -17,7 +17,8 @@ public class ModSkullBlock extends SkullBlock {
 
     @SuppressWarnings("unused")
     public enum Types implements SkullBlock.Type {
-        MINI_PEKKA
+        MINI_PEKKA,
+        PEKKA
     }
 
     public ModSkullBlock(Type type, Properties props) {
@@ -39,7 +40,7 @@ public class ModSkullBlock extends SkullBlock {
             Level level, BlockState state, BlockEntityType<T> type
     ) {
         if (level.isClientSide) {
-            if (state.is(ModBlocks.MINI_PK_HEAD.get())) {
+            if (state.is(ModBlocks.MINI_PK_HEAD.get()) || state.is(ModBlocks.PEKKA_HEAD.get())) {
                 return createTickerHelper(type, ModBlockEntities.EFFECT_SKULL.get(),
                         ModSkullBlockEntity::animation);
             }

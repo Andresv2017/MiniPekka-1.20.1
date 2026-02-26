@@ -42,7 +42,7 @@ public class ModSkullItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (!(bi.getBlock() instanceof SkullBlock skull)) return;
 
         SkullBlock.Type type = skull.getType();
-        if (type != ModSkullBlock.Types.MINI_PEKKA) return;
+        if (type != ModSkullBlock.Types.MINI_PEKKA && type != ModSkullBlock.Types.PEKKA) return;
 
         SkullModelBase model = this.skullModels.get(type);
         if (model == null) return;

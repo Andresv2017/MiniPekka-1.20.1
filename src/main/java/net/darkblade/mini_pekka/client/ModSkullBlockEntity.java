@@ -21,11 +21,13 @@ public class ModSkullBlockEntity extends SkullBlockEntity {
     }
 
     public static void animation(Level level, BlockPos pos, BlockState state, ModSkullBlockEntity be) {
-        boolean isMiniPekkaHead =
+        boolean isModHead =
                 state.is(ModBlocks.MINI_PK_HEAD.get()) ||
-                        state.is(ModBlocks.MINI_PK_WALL_HEAD.get());
+                        state.is(ModBlocks.MINI_PK_WALL_HEAD.get()) ||
+                        state.is(ModBlocks.PEKKA_HEAD.get()) ||
+                        state.is(ModBlocks.PEKKA_WALL_HEAD.get());
 
-        if (isMiniPekkaHead || level.hasNeighborSignal(pos)) {
+        if (isModHead || level.hasNeighborSignal(pos)) {
             be.isAnimating = true;
             be.animationTickCount++;
         } else {

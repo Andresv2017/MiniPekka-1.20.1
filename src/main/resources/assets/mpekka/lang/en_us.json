@@ -13,6 +13,9 @@
   "effect.mpekka.rage": "Rage",
   "item.mpekka.hero_crystal": "Hero Crystal",
   "item.mpekka.evo_crystal": "Evolution Crystal",
+  "block.mpekka.pekka_head": "P.E.K.K.A Head",
+  "block.mpekka.pekka_wall_head": "P.E.K.K.A Wall Head",
+  "item.mpekka.pekka_head": "P.E.K.K.A Head",
   "item.mpekka.pekka_spawn_egg": "P.E.K.K.A Spawn Egg",
   "creativetab.mpekka_tab": "P.E.K.K.A. Craft"
 }

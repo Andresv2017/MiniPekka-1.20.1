@@ -19,6 +19,7 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.mpekka_tab"))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.MINI_PK_HEAD.get());
+                        output.accept(ModItems.PEKKA_HEAD.get());
                         output.accept(ModItems.PK_SWORD.get());
                         output.accept(ModItems.PANCAKE.get());
                         output.accept(ModItems.RAGE_POTION.get());

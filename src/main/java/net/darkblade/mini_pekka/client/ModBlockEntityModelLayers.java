@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class ModBlockEntityModelLayers {
     public static final ModelLayerLocation MINI_PK_HEAD = register("mini_pk_head");
+    public static final ModelLayerLocation PEKKA_HEAD = register("pekka_head");
 
     private static ModelLayerLocation register(String layer) {
         return new ModelLayerLocation(new ResourceLocation(MiniPekkaMod.MODID, layer), "main");

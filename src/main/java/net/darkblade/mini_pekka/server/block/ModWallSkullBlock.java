@@ -48,7 +48,7 @@ public class ModWallSkullBlock extends WallSkullBlock {
             Level level, BlockState state, BlockEntityType<T> type
     ) {
         if (level.isClientSide) {
-            if (state.is(ModBlocks.MINI_PK_WALL_HEAD.get())) {
+            if (state.is(ModBlocks.MINI_PK_WALL_HEAD.get()) || state.is(ModBlocks.PEKKA_WALL_HEAD.get())) {
                 return createTickerHelper(type, ModBlockEntities.EFFECT_SKULL.get(),
                         ModSkullBlockEntity::animation);
             }

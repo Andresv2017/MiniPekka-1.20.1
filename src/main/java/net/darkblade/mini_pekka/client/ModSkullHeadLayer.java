@@ -33,12 +33,14 @@ public class ModSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> 
 
     private final ItemInHandRenderer itemInHandRenderer;
     private final SkullModelBase miniPekkaSkull;
+    private final SkullModelBase pekkaSkull;
 
     public ModSkullHeadLayer(RenderLayerParent<T, M> parent, EntityModelSet models,
                              ItemInHandRenderer inHandRenderer) {
         super(parent, models, 1.0F, 1.0F, 1.0F, inHandRenderer);
         this.itemInHandRenderer = inHandRenderer;
         this.miniPekkaSkull = new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD));
+        this.pekkaSkull = new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.PEKKA_HEAD));
     }
 
     @Override
@@ -62,7 +64,9 @@ public class ModSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> 
 
         if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof AbstractSkullBlock skullBlock) {
             SkullBlock.Type type = skullBlock.getType();
-            if (type == ModSkullBlock.Types.MINI_PEKKA) {
+            if (type == ModSkullBlock.Types.MINI_PEKKA || type == ModSkullBlock.Types.PEKKA) {
+                SkullModelBase skullModel = (type == ModSkullBlock.Types.PEKKA) ? pekkaSkull : miniPekkaSkull;
+
                 pose.scale(0.5f, -0.5F, -0.5F);
                 if (isVillager) pose.translate(0.0F, 0.0625F, 0.0F);
                 pose.translate(-0.5D, 0.0D, -0.5D);
@@ -83,7 +87,7 @@ public class ModSkullHeadLayer<T extends LivingEntity, M extends EntityModel<T> 
                         180.0F,
                         anim,
                         pose, buffers, light,
-                        miniPekkaSkull, rt
+                        skullModel, rt
                 );
                 pose.popPose();
                 return;

@@ -35,12 +35,15 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
 
     public static final ResourceLocation MINI_PEKKA_HEAD_TEX =
             new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_head/mini_pk_head.png");
+    public static final ResourceLocation PEKKA_HEAD_TEX =
+            new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/pekka_head/pekka_head.png");
 
     public ModSkullBlockRenderer(BlockEntityRendererProvider.Context ctx) {
         super(ctx);
         this.modelByType = createSkullRenderers(ctx.getModelSet());
 
         SKIN_BY_TYPE.put(ModSkullBlock.Types.MINI_PEKKA, MINI_PEKKA_HEAD_TEX);
+        SKIN_BY_TYPE.put(ModSkullBlock.Types.PEKKA, PEKKA_HEAD_TEX);
     }
 
     @Override
@@ -91,6 +94,7 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
         ImmutableMap.Builder<SkullBlock.Type, SkullModelBase> builder = ImmutableMap.builder();
 
         builder.put(ModSkullBlock.Types.MINI_PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
+        builder.put(ModSkullBlock.Types.PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.PEKKA_HEAD)));
 
         return builder.build();
     }

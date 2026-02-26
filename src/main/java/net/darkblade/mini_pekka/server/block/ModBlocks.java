@@ -29,4 +29,20 @@ public class ModBlocks {
                             .pushReaction(PushReaction.DESTROY)
             ));
 
+    public static final RegistryObject<Block> PEKKA_HEAD = BLOCKS.register("pekka_head",
+            () -> new ModSkullBlock(
+                    ModSkullBlock.Types.PEKKA,
+                    BlockBehaviour.Properties.of()
+                            .strength(1.0F)
+                            .pushReaction(PushReaction.DESTROY)
+            ));
+
+    public static final RegistryObject<Block> PEKKA_WALL_HEAD = BLOCKS.register("pekka_wall_head",
+            () -> new ModWallSkullBlock(
+                    ModSkullBlock.Types.PEKKA,
+                    BlockBehaviour.Properties.of()
+                            .strength(1.0F)
+                            .lootFrom(PEKKA_HEAD)
+                            .pushReaction(PushReaction.DESTROY)
+            ));
 }
