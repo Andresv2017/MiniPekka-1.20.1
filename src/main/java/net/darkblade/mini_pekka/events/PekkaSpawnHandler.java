@@ -29,7 +29,7 @@ public class PekkaSpawnHandler {
         BlockState placed = event.getPlacedBlock();
         BlockPos placedPos = event.getPos();
 
-        if (!placed.is(ModBlocks.MINI_PK_HEAD.get())) return;
+        if (!placed.is(ModBlocks.PEKKA_HEAD.get())) return;
 
         BlockPos belowHead = placedPos.below();
         if (!server.getBlockState(belowHead).is(Blocks.IRON_BLOCK)) return;

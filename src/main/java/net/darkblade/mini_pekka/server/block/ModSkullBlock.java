@@ -5,6 +5,7 @@ import net.darkblade.mini_pekka.client.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -14,6 +15,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ModSkullBlock extends SkullBlock {
+
+    protected static final VoxelShape MINI_PEKKA_SHAPE =
+            Block.box(0.0D, 0.0D, 3.5D, 16.0D, 10.0D, 12.5D);
+
+    protected static final VoxelShape PEKKA_SHAPE =
+            Block.box(0.0D, 0.0D, 3.5D, 16.0D, 12.0D, 12.5D);
 
     @SuppressWarnings("unused")
     public enum Types implements SkullBlock.Type {
@@ -27,7 +34,10 @@ public class ModSkullBlock extends SkullBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return SHAPE;
+        if (this.getType() == Types.PEKKA) {
+            return PEKKA_SHAPE;
+        }
+        return MINI_PEKKA_SHAPE;
     }
 
     @Override

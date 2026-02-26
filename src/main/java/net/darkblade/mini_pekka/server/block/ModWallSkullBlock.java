@@ -22,11 +22,18 @@ import java.util.Map;
 
 public class ModWallSkullBlock extends WallSkullBlock {
 
-    private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(
-            Direction.NORTH, Block.box(4.0D, 4.0D, 8.0D, 12.0D, 12.0D, 16.0D),
-            Direction.SOUTH, Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 8.0D),
-            Direction.EAST,  Block.box(0.0D, 4.0D, 4.0D, 8.0D, 12.0D, 12.0D),
-            Direction.WEST,  Block.box(8.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D)
+    private static final Map<Direction, VoxelShape> MINI_PEKKA_WALL_AABBS = Maps.newEnumMap(ImmutableMap.of(
+            Direction.NORTH, Block.box(0.0D, 3.0D, 7.0D, 16.0D, 13.0D, 16.0D),
+            Direction.SOUTH, Block.box(0.0D, 3.0D, 0.0D, 16.0D, 13.0D, 9.0D),
+            Direction.EAST,  Block.box(0.0D, 3.0D, 0.0D, 9.0D, 13.0D, 16.0D),
+            Direction.WEST,  Block.box(7.0D, 3.0D, 0.0D, 16.0D, 13.0D, 16.0D)
+    ));
+
+    private static final Map<Direction, VoxelShape> PEKKA_WALL_AABBS = Maps.newEnumMap(ImmutableMap.of(
+            Direction.NORTH, Block.box(0.0D, 2.0D, 7.0D, 16.0D, 14.0D, 16.0D),
+            Direction.SOUTH, Block.box(0.0D, 2.0D, 0.0D, 16.0D, 14.0D, 9.0D),
+            Direction.EAST,  Block.box(0.0D, 2.0D, 0.0D, 9.0D, 14.0D, 16.0D),
+            Direction.WEST,  Block.box(7.0D, 2.0D, 0.0D, 16.0D, 14.0D, 16.0D)
     ));
 
     public ModWallSkullBlock(SkullBlock.Type type, Properties props) {
@@ -35,7 +42,11 @@ public class ModWallSkullBlock extends WallSkullBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return AABBS.get(state.getValue(FACING));
+        Direction facing = state.getValue(FACING);
+        if (this.getType() == ModSkullBlock.Types.PEKKA) {
+            return PEKKA_WALL_AABBS.get(facing);
+        }
+        return MINI_PEKKA_WALL_AABBS.get(facing);
     }
 
     @Override

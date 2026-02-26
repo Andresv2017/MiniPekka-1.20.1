@@ -10,7 +10,7 @@
     "D": { "item": "minecraft:diamond" },
     "N": { "item": "minecraft:netherite_ingot" },
     "I": { "item": "minecraft:iron_block" },
-    "B": { "item": "minecraft:netherite_block" }
+    "B": { "item": "mpekka:mini_pk_head" }
   },
   "result": { "item": "mpekka:pekka_head", "count": 1 }
 }
