@@ -24,6 +24,9 @@ public class ClientEvents {
     @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT)
     public static class ClientForgeEvents {
 
+        // ¡ELIMINAMOS renderHeadPre y renderHeadPost que ocultaban la cabeza!
+        // Ahora tu cabeza base siempre será visible.
+
         @Mod.EventBusSubscriber(modid = MiniPekkaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
         public static class ClientModBusEvents {
 
@@ -55,6 +58,8 @@ public class ClientEvents {
 
             @SubscribeEvent(priority = EventPriority.LOWEST)
             public static void registerEffectSkullHeadLayers(final EntityRenderersEvent.AddLayers event) {
+                // (Mantenemos esto vacío/comentado como lo dejamos antes
+                // para que ModSkullHeadLayer no te estampe el bloque gigante)
             }
         }
     }

@@ -15,9 +15,9 @@ import java.util.UUID;
 
 public class PekkaHeadItem extends ModSkullItem {
 
-    private static final double NETHERITE_HELMET_ARMOR = 3.0D;
-    private static final double NETHERITE_HELMET_TOUGHNESS = 3.0D;
-    private static final double NETHERITE_HELMET_KB = 0.1D;
+    private static final double NETHERITE_HELMET_ARMOR = 5.0D;
+    private static final double NETHERITE_HELMET_TOUGHNESS = 4.0D;
+    private static final double NETHERITE_HELMET_KB = 0.2D;
 
     private static final UUID HELMET_ARMOR_UUID = UUID.fromString("a4d5e6f7-1234-5678-9abc-def012345678");
     private static final UUID HELMET_TOUGHNESS_UUID = UUID.fromString("b5e6f708-2345-6789-abcd-ef0123456789");
