@@ -14,16 +14,5 @@ public abstract class ModSkullItem extends StandingAndWallBlockItem {
         super(skull, wallSkull, properties, direction);
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        super.initializeClient(consumer);
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return ModSkullItemRenderer.getInstance();
-            }
-        });
-    }
-
     public abstract SoundEvent getSound();
 }
