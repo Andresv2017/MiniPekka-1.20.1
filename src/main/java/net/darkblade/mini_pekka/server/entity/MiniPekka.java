@@ -1,5 +1,6 @@
 package net.darkblade.mini_pekka.server.entity;
 
+import net.darkblade.mini_pekka.client.particles.ModParticles;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.ai.MiniPekkaAbilityGoal;
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
@@ -134,9 +135,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 if (!this.level().isClientSide) {
                     this.setHeroMode(true);
 
-                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.2f, 0.8f);
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+                            ModSounds.HERO_SPAWN.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
                     ((ServerLevel) this.level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
                             this.getX(), this.getY() + 0.5D, this.getZ(),
                             30, 0.3D, 0.5D, 0.3D, 0.2D);
@@ -182,7 +182,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                     this.setHeroCharge(0);
 
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+                            ModSounds.HERO_ABILITY.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
 
                     if (!player.getAbilities().instabuild) {
                         stack.shrink(1);
@@ -348,9 +348,19 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             if (this.attackSoundDelay > 0) {
                 this.attackSoundDelay--;
                 if (this.attackSoundDelay == 0) {
-                    float pitch = hasFury ? 1.1f : 1.0f;
+                    SoundEvent attackSound;
+                    float pitch;
+                    if (this.isHeroMode()) {
+                        attackSound = (this.getAttackIndex() == 0)
+                                ? ModSounds.HERO_SWORD.get()
+                                : ModSounds.HERO_SPATULA.get();
+                        pitch = hasFury ? 1.1f : 1.0f;
+                    } else {
+                        attackSound = ModSounds.ANA.get();
+                        pitch = hasFury ? 1.1f : 1.0f;
+                    }
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.ANA.get(), SoundSource.NEUTRAL, 1.0f, pitch);
+                            attackSound, SoundSource.NEUTRAL, 1.5f, pitch);
                     this.attackSoundDelay = -1;
                 }
             }
@@ -437,7 +447,39 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModSounds.DEATH.get();
+        return this.isHeroMode() ? ModSounds.HERO_DEATH.get() : ModSounds.DEATH.get();
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        super.die(source);
+        if (this.level() instanceof ServerLevel sl) {
+            double cx = this.getX();
+            double cy = this.getY() + this.getBbHeight() * 0.5;
+            double cz = this.getZ();
+            for (int i = 0; i < 12; i++) {
+                double ox = (this.random.nextDouble() - 0.5) * this.getBbWidth();
+                double oy = this.random.nextDouble() * this.getBbHeight() * 0.6;
+                double oz = (this.random.nextDouble() - 0.5) * this.getBbWidth();
+                double vx = (this.random.nextDouble() - 0.5) * 0.15;
+                double vy = 0.1 + this.random.nextDouble() * 0.2;
+                double vz = (this.random.nextDouble() - 0.5) * 0.15;
+                sl.sendParticles(ModParticles.ELIXIR_DROP.get(),
+                        cx + ox, cy + oy, cz + oz,
+                        1, vx, vy, vz, 0.05);
+            }
+        }
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return this.isHeroMode() ? ModSounds.HERO_AMBIENT.get() : null;
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return this.isHeroMode() ? 200 : super.getAmbientSoundInterval();
     }
 
 
@@ -475,22 +517,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     }
 
 
-    @Override
-    protected void tickDeath() {
-        ++this.deathTime;
-        this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
-        if (this.deathTime >= 59) {
-            if (!this.level().isClientSide) {
-                this.remove(RemovalReason.KILLED);
-            }
-        }
-    }
 
     protected <E extends MiniPekka> PlayState predicate(final AnimationState<E> event) {
-        if (this.deathTime > 0) {
-            event.setAndContinue(RawAnimation.begin().thenPlay("death"));
-            return PlayState.CONTINUE;
-        }
 
         if (this.isCastingAbility()) {
             if (!wasCastingAbility) {

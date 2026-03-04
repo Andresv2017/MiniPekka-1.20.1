@@ -19,6 +19,8 @@ public class ModParticles {
 
     public static final RegistryObject<SimpleParticleType> SPATULA = PARTICLE_TYPES.register("spatula", () -> new SimpleParticleType(true));
 
+    public static final RegistryObject<SimpleParticleType> ELIXIR_DROP = PARTICLE_TYPES.register("elixir_drop", () -> new SimpleParticleType(true));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

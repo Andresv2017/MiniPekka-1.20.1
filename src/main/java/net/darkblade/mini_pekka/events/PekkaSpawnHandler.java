@@ -4,10 +4,10 @@ import net.darkblade.mini_pekka.MiniPekkaMod;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
 import net.darkblade.mini_pekka.server.entity.MPekkaEntities;
 import net.darkblade.mini_pekka.server.entity.Pekka;
+import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -98,8 +98,7 @@ public class PekkaSpawnHandler {
 
         if (!server.addFreshEntity(pekka)) return false;
 
-        server.playSound(null, sx, sy, sz, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0f, 0.7f);
-        server.playSound(null, sx, sy, sz, SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 1.0f, 0.6f);
+        server.playSound(null, sx, sy, sz, ModSounds.PEKKA_SPAWN.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
         server.sendParticles(ParticleTypes.EXPLOSION, sx, sy + 1.0D, sz, 5, 0.5D, 0.5D, 0.5D, 0.0D);
         server.sendParticles(ParticleTypes.ENCHANT, sx, sy + 1.0D, sz, 40, 0.8D, 1.0D, 0.8D, 0.0D);
 

@@ -39,6 +39,10 @@ public class ModSounds {
             SOUNDS.register("entity.pekka.attack",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.attack")));
 
+    public static final RegistryObject<SoundEvent> PEKKA_ATTACK2 =
+            SOUNDS.register("entity.pekka.attack2",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.attack2")));
+
     public static final RegistryObject<SoundEvent> PEKKA_STEP =
             SOUNDS.register("entity.pekka.step",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.step")));
@@ -46,5 +50,60 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> PEKKA_DEATH =
             SOUNDS.register("entity.pekka.death",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.death")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_SPAWN =
+            SOUNDS.register("entity.pekka.spawn",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.spawn")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_AMBIENT =
+            SOUNDS.register("entity.pekka.ambient",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.ambient")));
+
+    // ── Pekka Evo sounds ──
+
+    public static final RegistryObject<SoundEvent> PEKKA_EVO_ATTACK =
+            SOUNDS.register("entity.pekka_evo.attack",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.attack")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_EVO_ATTACK2 =
+            SOUNDS.register("entity.pekka_evo.attack2",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.attack2")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_EVO_SPAWN =
+            SOUNDS.register("entity.pekka_evo.spawn",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.spawn")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_EVO_STEP =
+            SOUNDS.register("entity.pekka_evo.step",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.step")));
+
+    public static final RegistryObject<SoundEvent> PEKKA_EVO_AMBIENT =
+            SOUNDS.register("entity.pekka_evo.ambient",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.ambient")));
+
+    public static final RegistryObject<SoundEvent> HERO_ABILITY =
+            SOUNDS.register("entity.mini_pekka_hero.ability",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.ability")));
+
+    public static final RegistryObject<SoundEvent> HERO_AMBIENT =
+            SOUNDS.register("entity.mini_pekka_hero.ambient",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.ambient")));
+
+    public static final RegistryObject<SoundEvent> HERO_DEATH =
+            SOUNDS.register("entity.mini_pekka_hero.death",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.death")));
+
+    public static final RegistryObject<SoundEvent> HERO_SWORD =
+            SOUNDS.register("entity.mini_pekka_hero.sword",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.sword")));
+
+    public static final RegistryObject<SoundEvent> HERO_SPATULA =
+            SOUNDS.register("entity.mini_pekka_hero.spatula",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.spatula")));
+
+    public static final RegistryObject<SoundEvent> HERO_SPAWN =
+            SOUNDS.register("entity.mini_pekka_hero.spawn",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.spawn")));
+
 
 }

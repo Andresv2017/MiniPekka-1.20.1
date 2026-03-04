@@ -1,5 +1,6 @@
 package net.darkblade.mini_pekka.server.entity;
 
+import net.darkblade.mini_pekka.client.particles.ModParticles;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
 import net.darkblade.mini_pekka.server.items.ModItems;
@@ -117,7 +118,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             if (!this.isEvoMode()) {
                 if (!this.level().isClientSide) {
                     this.setEvoMode(true);
-                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.2f, 0.8f);
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PEKKA_EVO_SPAWN.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
                     ((ServerLevel) this.level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
                             this.getX(), this.getY() + 0.5D, this.getZ(),
                             30, 0.3D, 0.5D, 0.3D, 0.2D);
@@ -189,6 +191,9 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         if (!level().isClientSide && v && !was) {
             this.attackSoundDelay = 5;
         }
+        if (!level().isClientSide && !v && was) {
+            this.setAttackIndex(this.getAttackIndex() == 0 ? 1 : 0);
+        }
     }
 
     @Override
@@ -213,8 +218,18 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                 this.attackSoundDelay--;
                 if (this.attackSoundDelay == 0) {
                     float pitch = hasFury ? 0.9f : 0.8f;
+                    SoundEvent attackSound;
+                    if (this.isEvoMode()) {
+                        attackSound = (this.getAttackIndex() == 0)
+                                ? ModSounds.PEKKA_EVO_ATTACK.get()
+                                : ModSounds.PEKKA_EVO_ATTACK2.get();
+                    } else {
+                        attackSound = (this.getAttackIndex() == 0)
+                                ? ModSounds.PEKKA_ATTACK.get()
+                                : ModSounds.PEKKA_ATTACK2.get();
+                    }
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.PEKKA_ATTACK.get(), SoundSource.NEUTRAL, 1.0f, pitch);
+                            attackSound, SoundSource.NEUTRAL, 1.5f, pitch);
                     this.attackSoundDelay = -1;
                 }
             }
@@ -246,8 +261,11 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                 int interval = chasingOrAttacking ? 18 : 28;
                 long now = level().getGameTime();
                 if (now - lastStepSfxTick >= interval) {
+                    SoundEvent stepSound = this.isEvoMode()
+                            ? ModSounds.PEKKA_EVO_STEP.get()
+                            : ModSounds.PEKKA_STEP.get();
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.PEKKA_STEP.get(), this.getSoundSource(), 0.8F, 0.7F);
+                            stepSound, this.getSoundSource(), 0.8F, 0.7F);
                     lastStepSfxTick = now;
                 }
             }
@@ -257,6 +275,38 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     @Override
     protected SoundEvent getDeathSound() {
         return ModSounds.PEKKA_DEATH.get();
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return this.isEvoMode() ? ModSounds.PEKKA_EVO_AMBIENT.get() : ModSounds.PEKKA_AMBIENT.get();
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return 200;
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        super.die(source);
+        if (this.level() instanceof ServerLevel sl) {
+            double cx = this.getX();
+            double cy = this.getY() + this.getBbHeight() * 0.5;
+            double cz = this.getZ();
+            for (int i = 0; i < 18; i++) {
+                double ox = (this.random.nextDouble() - 0.5) * this.getBbWidth();
+                double oy = this.random.nextDouble() * this.getBbHeight() * 0.6;
+                double oz = (this.random.nextDouble() - 0.5) * this.getBbWidth();
+                double vx = (this.random.nextDouble() - 0.5) * 0.15;
+                double vy = 0.1 + this.random.nextDouble() * 0.2;
+                double vz = (this.random.nextDouble() - 0.5) * 0.15;
+                sl.sendParticles(ModParticles.ELIXIR_DROP.get(),
+                        cx + ox, cy + oy, cz + oz,
+                        1, vx, vy, vz, 0.05);
+            }
+        }
     }
 
     @Override
@@ -289,20 +339,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         controllers.add(new AnimationController<>(this, "controller", 7, this::predicate));
     }
 
-    @Override
-    protected void tickDeath() {
-        ++this.deathTime;
-        this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
-        if (this.deathTime >= 59 && !this.level().isClientSide) {
-            this.remove(RemovalReason.KILLED);
-        }
-    }
 
     protected <E extends Pekka> PlayState predicate(final AnimationState<E> event) {
-        if (this.deathTime > 0) {
-            event.setAndContinue(RawAnimation.begin().thenPlay("death"));
-            return PlayState.CONTINUE;
-        }
         if (this.hurtTime > 0 && !this.isDeadOrDying() && !this.isAttacking()) {
             if (!wasHurt) event.getController().forceAnimationReset();
             wasHurt = true;
