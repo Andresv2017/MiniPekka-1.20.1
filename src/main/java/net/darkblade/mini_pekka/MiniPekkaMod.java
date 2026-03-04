@@ -1,8 +1,10 @@
 package net.darkblade.mini_pekka;
 import com.mojang.logging.LogUtils;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
+import net.darkblade.mini_pekka.client.particles.ArrowUpParticle;
 import net.darkblade.mini_pekka.client.particles.RageParticle;
 import net.darkblade.mini_pekka.client.particles.ModParticles;
+import net.darkblade.mini_pekka.client.particles.SpatulaParticle;
 import net.darkblade.mini_pekka.client.render.PekkaRenderer;
 import net.darkblade.mini_pekka.constants.CRConstans;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
@@ -135,8 +137,9 @@ public class MiniPekkaMod
         @SubscribeEvent
         public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
             event.registerSpriteSet(ModParticles.RAGE_AURA.get(), RageParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.ARROW_UP.get(), ArrowUpParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.SPATULA.get(), SpatulaParticle.Provider::new);
         }
-
         @SubscribeEvent
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 

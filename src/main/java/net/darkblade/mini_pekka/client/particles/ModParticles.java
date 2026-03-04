@@ -15,6 +15,10 @@ public class ModParticles {
 
     public static final RegistryObject<SimpleParticleType> RAGE_AURA = PARTICLE_TYPES.register("rage_aura", () -> new SimpleParticleType(true));
 
+    public static final RegistryObject<SimpleParticleType> ARROW_UP = PARTICLE_TYPES.register("arrow_up", () -> new SimpleParticleType(true));
+
+    public static final RegistryObject<SimpleParticleType> SPATULA = PARTICLE_TYPES.register("spatula", () -> new SimpleParticleType(true));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

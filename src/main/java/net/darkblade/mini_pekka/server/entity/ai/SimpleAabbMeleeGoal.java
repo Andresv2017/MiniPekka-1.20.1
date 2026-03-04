@@ -77,8 +77,8 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
 
     private float attackLockedYaw = 0F;
 
-    private static final boolean DEBUG = true;
-    private static final boolean DEBUG_AABB = true;
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_AABB = false;
     private static final boolean DEBUG_HUD = false;
 
     private int dbgNextSendTick = 0;

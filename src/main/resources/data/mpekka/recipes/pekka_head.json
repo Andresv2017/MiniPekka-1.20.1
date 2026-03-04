@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "DND",
+    "A A",
     "IBI",
     " N "
   ],
   "key": {
-    "D": { "item": "minecraft:diamond" },
+    "A": { "item": "minecraft:amethyst_shard" },
     "N": { "item": "minecraft:netherite_ingot" },
     "I": { "item": "minecraft:iron_block" },
     "B": { "item": "mpekka:mini_pk_head" }

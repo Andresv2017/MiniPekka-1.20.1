@@ -1,6 +1,7 @@
 package net.darkblade.mini_pekka.server.entity;
 
 import net.darkblade.mini_pekka.server.effect.ModEffects;
+import net.darkblade.mini_pekka.server.entity.ai.MiniPekkaAbilityGoal;
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
 import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
@@ -60,6 +61,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HERO_ABILITY_ACTIVE =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> CASTING_ABILITY =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
@@ -75,6 +78,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean wasHurt = false;
+    private boolean wasCastingAbility = false;
     private int spawnGraceTicks = 30;
 
     public MiniPekka(EntityType<? extends TamableAnimal> type, Level level) {
@@ -93,9 +97,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(2, new SimpleAabbMeleeGoal<>(
+        this.goalSelector.addGoal(0, new MiniPekkaAbilityGoal(this));
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new SimpleAabbMeleeGoal<>(
                 this,
                 ATTACK_RANGE,
                 CHASE_SPEED,
@@ -107,10 +112,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 this::setAttacking,
                 this::getHeroAttackTempo
         ));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
-        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
-        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1D));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
@@ -176,13 +181,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
                     this.setHeroCharge(0);
 
-                    this.playSound(SoundEvents.TOTEM_USE, 1.0f, 1.2f);
-                    ((ServerLevel) level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
-                            getX(), getY() + getBbHeight() * 0.5D, getZ(),
-                            30, 0.4D, 0.6D, 0.4D, 0.2D);
-                    ((ServerLevel) level()).sendParticles(ParticleTypes.HEART,
-                            getX(), getY() + getBbHeight() * 0.6D, getZ(),
-                            10, 0.3D, 0.3D, 0.3D, 0.02D);
+                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
 
                     if (!player.getAbilities().instabuild) {
                         stack.shrink(1);
@@ -263,6 +263,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.entityData.define(ATTACK_INDEX, 0);
         this.entityData.define(HERO_CHARGE, 0);
         this.entityData.define(HERO_ABILITY_ACTIVE, false);
+        this.entityData.define(CASTING_ABILITY, false);
     }
 
     public boolean hasPancakesSkin() {
@@ -294,6 +295,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     public boolean isHeroChargeReady() { return this.getHeroCharge() >= HERO_CHARGE_MAX; }
     public boolean isHeroAbilityActive() { return this.entityData.get(HERO_ABILITY_ACTIVE); }
     public void setHeroAbilityActive(boolean active) { this.entityData.set(HERO_ABILITY_ACTIVE, active); }
+    public int getHeroAbilityTicksRemaining() {return this.heroAbilityTicksRemaining; }
+
+    public boolean isCastingAbility() { return this.entityData.get(CASTING_ABILITY); }
+    public void setCastingAbility(boolean active) { this.entityData.set(CASTING_ABILITY, active); }
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -486,6 +491,17 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             event.setAndContinue(RawAnimation.begin().thenPlay("death"));
             return PlayState.CONTINUE;
         }
+
+        if (this.isCastingAbility()) {
+            if (!wasCastingAbility) {
+                event.getController().forceAnimationReset();
+            }
+            wasCastingAbility = true;
+            event.setAndContinue(RawAnimation.begin().thenPlay("ability"));
+            return PlayState.CONTINUE;
+        }
+        wasCastingAbility = false;
+
         if (this.hurtTime > 0 && !this.isDeadOrDying() && !this.isAttacking()) {
             if (!wasHurt) {
                 event.getController().forceAnimationReset();
@@ -615,5 +631,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         if (effect.getEffect() == ModEffects.RAGE.get()) {
             updateRageAttackSpeed(false);
         }
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (this.isHeroAbilityActive() && this.heroAbilityTicksRemaining > 580) {
+            return false;
+        }
+        return super.hurt(source, amount);
     }
 }
