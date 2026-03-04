@@ -184,9 +184,7 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         final double d3 = mob.distanceToSqr(target.getX(), target.getY(), target.getZ());
         final boolean inEdgeRange = isInAttackRangeEdgeXZ(target);
 
-        // --- LOOK CONTROL: suave durante ataque, normal durante persecución ---
         if (active) {
-            // Durante el ataque: solo girar la cabeza muy suavemente, no el cuerpo
             mob.getLookControl().setLookAt(target, 8.0F, 8.0F);
         } else {
             mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
@@ -195,7 +193,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
         final boolean hasLOS = !REQUIRE_LOS || mob.getSensing().hasLineOfSight(target);
 
-        // --- NAVEGACIÓN: solo cuando NO está atacando ---
         if (!active) {
             if (this.ticksUntilNextPathRecalculation <= 0 &&
                     (this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0
@@ -206,7 +203,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
                 this.pathedTargetY = target.getY();
                 this.pathedTargetZ = target.getZ();
 
-                // Intervalo adaptativo: más lento cerca del target para evitar giros
                 if (d3 < CLOSE_RANGE_SQ) {
                     this.ticksUntilNextPathRecalculation = RECALC_CLOSE_MIN + mob.getRandom().nextInt(RECALC_CLOSE_MAX - RECALC_CLOSE_MIN + 1);
                 } else {
@@ -237,7 +233,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
                 this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
             }
 
-            // Fallback solo si realmente no tiene path y no está cerca
             if ((mob.getNavigation().isDone() || mob.getNavigation().getPath() == null) && !inEdgeRange && d3 > CLOSE_RANGE_SQ) {
                 mob.getNavigation().moveTo(target, CHASE_SPEED);
             }
@@ -298,7 +293,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         refreshAttackTempos();
         tick = 0;
 
-        // Fijar la rotación del cuerpo hacia el target al iniciar el ataque
         LivingEntity target = mob.getTarget();
         if (target != null) {
             double dx = target.getX() - mob.getX();
@@ -310,7 +304,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
             this.attackLockedYaw = desiredYaw;
         }
 
-        // Detener la navegación para que no compita con la animación de ataque
         mob.getNavigation().stop();
 
         setAttackActive(true);
@@ -380,7 +373,6 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
         int baseDuration = this.DURATION_TICKS;
         int[] baseFrames = this.DAMAGE_FRAMES;
 
-        // If a tempo supplier is provided (e.g. hero mode alternating attacks), use it
         if (this.tempoSupplier != null) {
             int[] tempo = this.tempoSupplier.getCurrentAttackTempo();
             if (tempo != null && tempo.length >= 2) {
@@ -390,26 +382,9 @@ public class SimpleAabbMeleeGoal<E extends PathfinderMob> extends Goal {
             }
         }
 
-        this.dynamicAttackDuration = Math.max(5, (int) Math.round(baseDuration * scale));
-        if (baseFrames.length > 0) {
-            int[] scaled = new int[baseFrames.length];
-            int prev = 0;
-            for (int i = 0; i < baseFrames.length; i++) {
-                int frame = Math.max(1, (int) Math.round(baseFrames[i] * scale));
-                int maxFrame = Math.max(1, this.dynamicAttackDuration - 1);
-                if (frame >= maxFrame) {
-                    frame = maxFrame;
-                }
-                if (i > 0 && frame <= prev) {
-                    frame = prev + 1;
-                }
-                prev = frame;
-                scaled[i] = frame;
-            }
-            this.dynamicDamageFrames = scaled;
-        } else {
-            this.dynamicDamageFrames = baseFrames;
-        }
+        this.dynamicAttackDuration = baseDuration;
+        this.dynamicDamageFrames = baseFrames;
+
         this.dynamicAttackDelayTicks = Math.max(1, (int) Math.round(20 * scale));
     }
 

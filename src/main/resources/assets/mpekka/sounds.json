@@ -50,26 +50,26 @@
 
   "entity.pekka_evo.attack": {
     "subtitle": "subtitles.pekka_evo.attack",
-    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_attack", "volume": 2.0, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_attack", "volume": 2.5, "pitch": 1.0, "stream": false }]
   },
   "entity.pekka_evo.attack2": {
     "subtitle": "subtitles.pekka_evo.attack2",
-    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_attack2", "volume": 2.0, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_attack2", "volume": 2.5, "pitch": 1.0, "stream": false }]
   },
   "entity.pekka_evo.spawn": {
     "subtitle": "subtitles.pekka_evo.spawn",
-    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_spawn", "volume": 1.5, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_spawn", "volume": 1.7, "pitch": 1.0, "stream": false }]
   },
   "entity.pekka_evo.step": {
     "subtitle": "subtitles.pekka_evo.step",
     "sounds": [
-      { "name": "mpekka:entity/pekka_evo/pk_evo_step",  "volume": 1.1, "pitch": 1.0, "stream": false },
-      { "name": "mpekka:entity/pekka_evo/pk_evo_step2", "volume": 1.1, "pitch": 1.0, "stream": false }
+      { "name": "mpekka:entity/pekka_evo/pk_evo_step",  "volume": 1.6, "pitch": 1.0, "stream": false },
+      { "name": "mpekka:entity/pekka_evo/pk_evo_step2", "volume": 1.6, "pitch": 1.0, "stream": false }
     ]
   },
   "entity.pekka_evo.ambient": {
     "subtitle": "subtitles.pekka_evo.ambient",
-    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_ambient", "volume": 1.0, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_ambient", "volume": 1.2, "pitch": 1.0, "stream": false }]
   },
 
   "entity.mini_pekka_hero.ability": {

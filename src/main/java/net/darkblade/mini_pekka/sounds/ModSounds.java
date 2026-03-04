@@ -59,8 +59,6 @@ public class ModSounds {
             SOUNDS.register("entity.pekka.ambient",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.ambient")));
 
-    // ── Pekka Evo sounds ──
-
     public static final RegistryObject<SoundEvent> PEKKA_EVO_ATTACK =
             SOUNDS.register("entity.pekka_evo.attack",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka_evo.attack")));

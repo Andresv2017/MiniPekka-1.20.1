@@ -57,9 +57,17 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> ATTACK_INDEX =
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> EVO_ABILITY_FLASH_TICKS =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("ae7eb812-99f4-4e96-b3e4-184c99090c37");
+
+    private static final float EVO_HEAL_MIN_PERCENT = 0.035F;
+    private static final float EVO_HEAL_MAX_PERCENT = 0.15F;
+    private static final float EVO_VICTIM_HP_LOW    = 6.0F;
+    private static final float EVO_VICTIM_HP_HIGH   = 100.0F;
+    private static final float EVO_OVERHEAL_CAP     = 0.50F;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean wasHurt = false;
@@ -173,6 +181,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         this.entityData.define(IS_STAR_MODE, false);
         this.entityData.define(IS_EVO_MODE, false);
         this.entityData.define(ATTACK_INDEX, 0);
+        this.entityData.define(EVO_ABILITY_FLASH_TICKS, 0);
     }
 
     public boolean isRaging() { return this.entityData.get(RAGING); }
@@ -184,6 +193,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public int getAttackIndex() { return this.entityData.get(ATTACK_INDEX); }
     public void setAttackIndex(int index) { this.entityData.set(ATTACK_INDEX, index); }
     public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
+    public int getEvoAbilityFlashTicks() { return this.entityData.get(EVO_ABILITY_FLASH_TICKS); }
+    public void setEvoAbilityFlashTicks(int ticks) { this.entityData.set(EVO_ABILITY_FLASH_TICKS, ticks); }
 
     private void setAttacking(boolean v) {
         boolean was = this.entityData.get(DATA_ATTACKING);
@@ -207,6 +218,10 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         super.tick();
         if (!level().isClientSide) {
             if (spawnGraceTicks > 0) spawnGraceTicks--;
+
+            if (this.getEvoAbilityFlashTicks() > 0) {
+                this.setEvoAbilityFlashTicks(this.getEvoAbilityFlashTicks() - 1);
+            }
 
             boolean hasFury = this.hasEffect(ModEffects.RAGE.get());
             if (hasFury != this.isRaging()) {
@@ -310,6 +325,52 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     }
 
     @Override
+    public boolean killedEntity(ServerLevel level, LivingEntity victim) {
+        boolean result = super.killedEntity(level, victim);
+
+        if (this.isEvoMode() && !this.isDeadOrDying()) {
+            float victimMaxHp = victim.getMaxHealth();
+            float baseMaxHp   = (float) this.getAttributeBaseValue(Attributes.MAX_HEALTH);
+
+            float t = (victimMaxHp - EVO_VICTIM_HP_LOW) / (EVO_VICTIM_HP_HIGH - EVO_VICTIM_HP_LOW);
+            t = Math.max(0.0F, Math.min(1.0F, t));
+            float healPercent = EVO_HEAL_MIN_PERCENT + t * (EVO_HEAL_MAX_PERCENT - EVO_HEAL_MIN_PERCENT);
+            float healAmount  = baseMaxHp * healPercent;
+
+
+            applyEvoHeal(healAmount, baseMaxHp);
+            this.setEvoAbilityFlashTicks(40);
+        }
+
+        return result;
+    }
+
+    private void applyEvoHeal(float healAmount, float baseMaxHp) {
+        float missingHp = baseMaxHp - this.getHealth();
+        float normalHeal = Math.min(healAmount, Math.max(0, missingHp));
+        if (normalHeal > 0) {
+            this.heal(normalHeal);
+        }
+
+        float leftover = healAmount - normalHeal;
+
+        float overhealCap = baseMaxHp * EVO_OVERHEAL_CAP;
+        float currentAbsorption = this.getAbsorptionAmount();
+        float availableOverheal = overhealCap - currentAbsorption;
+
+        if (leftover > 0 && availableOverheal > 0) {
+            float overhealToApply = Math.min(leftover, availableOverheal);
+            this.setAbsorptionAmount(currentAbsorption + overhealToApply);
+        }
+
+        if (this.level() instanceof ServerLevel sl) {
+            sl.sendParticles(ParticleTypes.HEART,
+                    this.getX(), this.getY() + this.getBbHeight() * 0.7, this.getZ(),
+                    4, 0.3, 0.2, 0.3, 0.02);
+        }
+    }
+
+    @Override
     public boolean canAttack(LivingEntity target) {
         if (target instanceof Player p && this.isOwnedBy(p)) return false;
         if (target instanceof TamableAnimal other && this.isTame() && other.isTame()) {
@@ -325,6 +386,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         super.addAdditionalSaveData(tag);
         tag.putBoolean("IsStarMode", this.isStarMode());
         tag.putBoolean("IsEvoMode", this.isEvoMode());
+        tag.putFloat("EvoAbsorption", this.getAbsorptionAmount());
     }
 
     @Override
@@ -332,6 +394,9 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         super.readAdditionalSaveData(tag);
         this.setStarMode(tag.getBoolean("IsStarMode"));
         this.setEvoMode(tag.getBoolean("IsEvoMode"));
+        if (tag.contains("EvoAbsorption")) {
+            this.setAbsorptionAmount(tag.getFloat("EvoAbsorption"));
+        }
     }
 
     @Override

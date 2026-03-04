@@ -10,5 +10,6 @@ public class PekkaRenderer extends GeoEntityRenderer<Pekka> {
     public PekkaRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new PekkaModel());
         this.addRenderLayer(new PekkaRageEffectLayer(this));
+        this.addRenderLayer(new PekkaEvoAbilityLayer(this));
     }
 }
