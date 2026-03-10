@@ -93,7 +93,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 .add(Attributes.MOVEMENT_SPEED, 0.20D)
                 .add(Attributes.ATTACK_SPEED, 0.8D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5F)
-                .add(Attributes.ATTACK_DAMAGE, 18.0F);
+                .add(Attributes.ATTACK_DAMAGE, 18.0F)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }
 
     @Override
@@ -668,5 +669,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             return false;
         }
         return super.hurt(source, amount);
+    }
+
+    @Override
+    public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
+        return false;
     }
 }

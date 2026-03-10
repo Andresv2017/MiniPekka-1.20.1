@@ -79,7 +79,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     private static final int  CD_BASE         = 0;
 
     private static final SimpleAabbMeleeGoal.AttackHitbox HITBOX =
-            SimpleAabbMeleeGoal.AttackHitbox.of(1.15, 2.00, 1.5, 0.00, 0.0);
+            SimpleAabbMeleeGoal.AttackHitbox.of(1.45, 2.00, 1.5, 0.00, 0.0);
 
     public Pekka(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -92,7 +92,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                 .add(Attributes.MOVEMENT_SPEED, 0.18D)
                 .add(Attributes.ATTACK_SPEED, 0.8D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.8F)
-                .add(Attributes.ATTACK_DAMAGE, 30.0F);
+                .add(Attributes.ATTACK_DAMAGE, 30.0F)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }
 
     @Override
@@ -470,5 +471,10 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public void onEffectRemoved(MobEffectInstance effect) {
         super.onEffectRemoved(effect);
         if (effect.getEffect() == ModEffects.RAGE.get()) updateRageAttackSpeed(false);
+    }
+
+    @Override
+    public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
+        return false;
     }
 }
