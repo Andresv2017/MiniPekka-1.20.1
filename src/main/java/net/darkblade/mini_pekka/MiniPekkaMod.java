@@ -1,11 +1,8 @@
 package net.darkblade.mini_pekka;
 import com.mojang.logging.LogUtils;
 import net.darkblade.mini_pekka.client.ModBlockEntities;
-import net.darkblade.mini_pekka.client.particles.ArrowUpParticle;
-import net.darkblade.mini_pekka.client.particles.ElixirDropParticle;
-import net.darkblade.mini_pekka.client.particles.RageParticle;
-import net.darkblade.mini_pekka.client.particles.ModParticles;
-import net.darkblade.mini_pekka.client.particles.SpatulaParticle;
+import net.darkblade.mini_pekka.client.particles.*;
+import net.darkblade.mini_pekka.client.render.ButterflyRenderer;
 import net.darkblade.mini_pekka.client.render.PekkaRenderer;
 import net.darkblade.mini_pekka.constants.CRConstans;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
@@ -112,13 +109,11 @@ public class MiniPekkaMod
         });
     }
 
-    // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
 
     }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
@@ -130,7 +125,6 @@ public class MiniPekkaMod
         event.put(MPekkaEntities.PEKKA.get(), Pekka.createAttributes().build());
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
     {
@@ -141,6 +135,8 @@ public class MiniPekkaMod
             event.registerSpriteSet(ModParticles.ARROW_UP.get(), ArrowUpParticle.Provider::new);
             event.registerSpriteSet(ModParticles.SPATULA.get(), SpatulaParticle.Provider::new);
             event.registerSpriteSet(ModParticles.ELIXIR_DROP.get(), ElixirDropParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.STAR_PARTICLE.get(), FallingStarParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.STAR_PARTICLE_EVO.get(), FallingStarParticle.Provider::new);
         }
         @SubscribeEvent
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -157,6 +153,7 @@ public class MiniPekkaMod
         {
             EntityRenderers.register(MPekkaEntities.MPEKKA.get(), MiniPekkaRenderer::new);
             EntityRenderers.register(MPekkaEntities.PEKKA.get(), PekkaRenderer::new);
+            EntityRenderers.register(MPekkaEntities.BUTTERFLY.get(), ButterflyRenderer::new);
             event.enqueueWork(() -> {
                 EntityRenderers.register(
                         MPekkaEntities.RAGE_POTION_PROJECTILE.get(),

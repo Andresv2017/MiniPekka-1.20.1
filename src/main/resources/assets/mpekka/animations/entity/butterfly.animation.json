@@ -1,0 +1,26 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"fly": {
+			"loop": true,
+			"bones": {
+				"bone": {
+					"rotation": {
+						"vector": ["-math.cos(query.anim_time*720)*10", "-math.cos(query.anim_time*1024)*5", 0]
+					}
+				},
+				"bone2": {
+					"rotation": {
+						"vector": [0, 0, "math.cos(query.anim_time*1440)*17"]
+					}
+				},
+				"bone3": {
+					"rotation": {
+						"vector": [0, 0, "-math.cos(query.anim_time*1440)*17"]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

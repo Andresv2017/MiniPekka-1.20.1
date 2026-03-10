@@ -1,6 +1,7 @@
 package net.darkblade.mini_pekka.server.entity;
 
 import net.darkblade.mini_pekka.MiniPekkaMod;
+import net.darkblade.mini_pekka.server.entity.projectile.ButterflyEntity;
 import net.darkblade.mini_pekka.server.entity.projectile.RageThrownPotion;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +35,14 @@ public class MPekkaEntities {
                             .clientTrackingRange(4)
                             .updateInterval(10)
                             .build(new ResourceLocation(MiniPekkaMod.MODID, "rage_potion_projectile").toString()));
+
+    public static final RegistryObject<EntityType<ButterflyEntity>> BUTTERFLY =
+            ENTITY_REGISTER.register("butterfly",
+                    () -> EntityType.Builder.<ButterflyEntity>of(ButterflyEntity::new, MobCategory.MISC)
+                            .sized(0.5f, 0.5f)
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build(new ResourceLocation(MiniPekkaMod.MODID, "butterfly").toString()));
 
 
     public static void register(IEventBus eventBus){

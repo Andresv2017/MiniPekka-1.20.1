@@ -99,6 +99,10 @@
   "entity.mini_pekka_hero.spawn": {
     "subtitle": "subtitles.mini_pekka_hero.spawn",
     "sounds": [{ "name": "mpekka:entity/mini_pekka_hero/pk_hero_spawn", "volume": 1.5, "pitch": 1.0, "stream": false }]
+  },
+  "star_level_up": {
+    "category": "neutral",
+    "sounds": [{ "name": "mpekka:item/star_level_up","volume": 1.5, "pitch": 1.0, "stream": false }]
   }
 }
 

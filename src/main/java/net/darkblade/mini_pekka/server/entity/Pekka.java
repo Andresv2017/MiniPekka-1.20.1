@@ -3,6 +3,7 @@ package net.darkblade.mini_pekka.server.entity;
 import net.darkblade.mini_pekka.client.particles.ModParticles;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.ai.SimpleAabbMeleeGoal;
+import net.darkblade.mini_pekka.server.entity.projectile.ButterflyEntity;
 import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,10 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -73,7 +71,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     private boolean wasHurt = false;
     private int spawnGraceTicks = 30;
 
-    private static final double ATTACK_RANGE = 1.40;
+    private static final double ATTACK_RANGE = 1.60;
     private static final double CHASE_SPEED  = 1.4;
     private static final boolean REQUIRE_LOS = true;
     private static final int  ATTACK_DURATION = 20;
@@ -128,9 +126,15 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                     this.setEvoMode(true);
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
                             ModSounds.PEKKA_EVO_SPAWN.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
-                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
-                            this.getX(), this.getY() + 0.5D, this.getZ(),
-                            30, 0.3D, 0.5D, 0.3D, 0.2D);
+                    ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE_EVO.get(),
+                            this.getX(),
+                            this.getY() + this.getBbHeight() + 0.5D,
+                            this.getZ(),
+                            16,
+                            0.9D,
+                            0.4D,
+                            0.9D,
+                            0.0D);
                     if (!player.getAbilities().instabuild) stack.shrink(1);
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -141,10 +145,16 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             if (!this.isStarMode()) {
                 if (!this.level().isClientSide) {
                     this.setStarMode(true);
-                    this.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
-                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.FIREWORK,
-                            this.getX(), this.getY() + 0.5D, this.getZ(),
-                            5, 0.2D, 0.2D, 0.2D, 0.1D);
+                    this.playSound(ModSounds.STAR_LEVEL_UP.get(), 1.0f, 1.0f);
+                    ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE.get(),
+                            this.getX(),
+                            this.getY() + this.getBbHeight() + 0.5D,
+                            this.getZ(),
+                            16,
+                            0.9D,
+                            0.4D,
+                            0.9D,
+                            0.0D);
                     if (!player.getAbilities().instabuild) stack.shrink(1);
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -337,12 +347,24 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             float healPercent = EVO_HEAL_MIN_PERCENT + t * (EVO_HEAL_MAX_PERCENT - EVO_HEAL_MIN_PERCENT);
             float healAmount  = baseMaxHp * healPercent;
 
-
-            applyEvoHeal(healAmount, baseMaxHp);
-            this.setEvoAbilityFlashTicks(40);
+            ButterflyEntity butterfly = MPekkaEntities.BUTTERFLY.get().create(level);
+            if (butterfly != null) {
+                butterfly.moveTo(victim.getX(), victim.getY() + 1.0, victim.getZ());
+                butterfly.setTargetPekka(this);
+                butterfly.setHealAmount(healAmount);
+                level.addFreshEntity(butterfly);
+            }
         }
 
         return result;
+    }
+
+    public void receiveButterflyHeal(float healAmount) {
+        if (!this.level().isClientSide && !this.isDeadOrDying()) {
+            float baseMaxHp = (float) this.getAttributeBaseValue(Attributes.MAX_HEALTH);
+            this.applyEvoHeal(healAmount, baseMaxHp);
+            this.setEvoAbilityFlashTicks(40);
+        }
     }
 
     private void applyEvoHeal(float healAmount, float baseMaxHp) {

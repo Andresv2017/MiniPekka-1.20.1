@@ -21,6 +21,10 @@ public class ModParticles {
 
     public static final RegistryObject<SimpleParticleType> ELIXIR_DROP = PARTICLE_TYPES.register("elixir_drop", () -> new SimpleParticleType(true));
 
+    public static final RegistryObject<SimpleParticleType> STAR_PARTICLE = PARTICLE_TYPES.register("star_particle", () -> new SimpleParticleType(true));
+
+    public static final RegistryObject<SimpleParticleType> STAR_PARTICLE_EVO = PARTICLE_TYPES.register("star_particle_evo", () -> new SimpleParticleType(true));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }
