@@ -17,5 +17,11 @@
   "block.mpekka.pekka_wall_head": "P.E.K.K.A Wall Head",
   "item.mpekka.pekka_head": "P.E.K.K.A Head",
   "item.mpekka.pekka_spawn_egg": "P.E.K.K.A Spawn Egg",
-  "creativetab.mpekka_tab": "P.E.K.K.A. Craft"
+  "creativetab.mpekka_tab": "P.E.K.K.A. Craft",
+
+  "item.mpekka.evo_fragment": "Evo Fragment",
+  "item.mpekka.hero_box": "Hero Box",
+  "item.mpekka.hero_shards_small": "Small Hero Shards",
+  "item.mpekka.hero_shards_medium": "Hero Shards",
+  "item.mpekka.hero_shards_big": "Big Hero Shards"
 }

@@ -66,4 +66,19 @@ public class ModItems {
 
     public static final RegistryObject<Item> PEKKA_SPAWN_EGG = ITEMS.register("pekka_spawn_egg",
             () -> new ForgeSpawnEggItem(MPekkaEntities.PEKKA, 0x2d446a, 0xc363c5, new Item.Properties()));
+
+    public static final RegistryObject<Item> EVO_FRAGMENT = ITEMS.register("evo_fragment",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HERO_SHARDS_SMALL = ITEMS.register("hero_shards_small",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HERO_SHARDS_MEDIUM = ITEMS.register("hero_shards_medium",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HERO_SHARDS_BIG = ITEMS.register("hero_shards_big",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HERO_BOX = ITEMS.register("hero_box",
+            () -> new HeroBoxItem(new Item.Properties()));
 }

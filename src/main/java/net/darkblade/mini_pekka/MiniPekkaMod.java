@@ -13,6 +13,7 @@ import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.darkblade.mini_pekka.server.entity.Pekka;
 import net.darkblade.mini_pekka.server.items.ModCreativeModeTabs;
 import net.darkblade.mini_pekka.server.items.ModItems;
+import net.darkblade.mini_pekka.server.loot.ModLootModifiers;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -72,6 +73,7 @@ public class MiniPekkaMod
         ModItems.ITEMS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
         ModCreativeModeTabs.register(modEventBus);
+        ModLootModifiers.register(modEventBus);
 
         MolangParser.INSTANCE.register(new LazyVariable(CRConstans.HEAD_X_QUERY, 0));
         MolangParser.INSTANCE.register(new LazyVariable(CRConstans.HEAD_Y_QUERY, 0));

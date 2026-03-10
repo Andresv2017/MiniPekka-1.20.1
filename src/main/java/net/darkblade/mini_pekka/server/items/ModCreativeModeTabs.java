@@ -28,6 +28,11 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.STAR_ITEM.get());
                         output.accept(ModItems.HERO_CRYSTAL.get());
                         output.accept(ModItems.EVO_CRYSTAL.get());
+                        output.accept(ModItems.EVO_FRAGMENT.get());
+                        output.accept(ModItems.HERO_SHARDS_SMALL.get());
+                        output.accept(ModItems.HERO_SHARDS_MEDIUM.get());
+                        output.accept(ModItems.HERO_SHARDS_BIG.get());
+                        output.accept(ModItems.HERO_BOX.get());
                     })
                     .build());
 

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "entries": [
+    "mpekka:hero_box_common",
+    "mpekka:hero_box_medium",
+    "mpekka:hero_box_rare",
+    "mpekka:evo_fragment_common",
+    "mpekka:evo_fragment_medium",
+    "mpekka:evo_fragment_rare"
+  ]
+}
