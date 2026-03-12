@@ -139,6 +139,8 @@ public class MiniPekkaMod
             event.registerSpriteSet(ModParticles.ELIXIR_DROP.get(), ElixirDropParticle.Provider::new);
             event.registerSpriteSet(ModParticles.STAR_PARTICLE.get(), FallingStarParticle.Provider::new);
             event.registerSpriteSet(ModParticles.STAR_PARTICLE_EVO.get(), FallingStarParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.SWEEP_EVO.get(), ModSweepAttackParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.SWEEP_HERO.get(), ModSweepAttackParticle.Provider::new);
         }
         @SubscribeEvent
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {

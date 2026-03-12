@@ -477,4 +477,25 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
         return false;
     }
+
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
+
+        if (hit && this.level() instanceof ServerLevel sl) {
+
+            if (this.isEvoMode()) {
+                double d0 = -Math.sin(this.getYRot() * ((float)Math.PI / 180F));
+                double d1 = Math.cos(this.getYRot() * ((float)Math.PI / 180F));
+
+                double particleX = this.getX() + d0 * 1.6;
+                double particleY = this.getY() + (this.getBbHeight() * 0.5);
+                double particleZ = this.getZ() + d1 * 1.6;
+
+                sl.sendParticles(ModParticles.SWEEP_EVO.get(), particleX, particleY, particleZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
+        }
+
+        return hit;
+    }
 }

@@ -576,20 +576,33 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
         boolean hit = super.doHurtTarget(target);
-        if (hit && !level().isClientSide && this.isHeroMode()
-                && !this.isHeroAbilityActive() && !this.isHeroChargeReady()) {
-            this.setHeroCharge(this.getHeroCharge() + 1);
-            if (this.isHeroChargeReady()) {
-                this.playSound(SoundEvents.PLAYER_LEVELUP, 0.8f, 1.5f);
-                if (level() instanceof ServerLevel sl) {
-                    sl.sendParticles(ParticleTypes.ENCHANT,
+
+        if (hit && this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+
+            if (this.isHeroMode()) {
+                double d0 = -Math.sin(this.getYRot() * ((float)Math.PI / 180F));
+                double d1 = Math.cos(this.getYRot() * ((float)Math.PI / 180F));
+
+                double particleX = this.getX() + d0 * 1.2;
+                double particleY = this.getY() + (this.getBbHeight() * 0.5);
+                double particleZ = this.getZ() + d1 * 1.2;
+
+                sl.sendParticles(ModParticles.SWEEP_HERO.get(), particleX, particleY, particleZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
+
+            if (this.isHeroMode() && !this.isHeroAbilityActive() && !this.isHeroChargeReady()) {
+                this.setHeroCharge(this.getHeroCharge() + 1);
+                if (this.isHeroChargeReady()) {
+                    this.playSound(net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 0.8f, 1.5f);
+                    sl.sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT,
                             getX(), getY() + getBbHeight() + 0.3D, getZ(),
                             15, 0.2D, 0.1D, 0.2D, 0.05D);
                 }
             }
         }
+
         return hit;
     }
 
