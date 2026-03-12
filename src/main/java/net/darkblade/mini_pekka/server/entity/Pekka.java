@@ -488,11 +488,13 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                 double d0 = -Math.sin(this.getYRot() * ((float)Math.PI / 180F));
                 double d1 = Math.cos(this.getYRot() * ((float)Math.PI / 180F));
 
-                double particleX = this.getX() + d0 * 1.6;
+                double particleX = this.getX() + d0 * 2.8;
                 double particleY = this.getY() + (this.getBbHeight() * 0.5);
-                double particleZ = this.getZ() + d1 * 1.6;
+                double particleZ = this.getZ() + d1 * 2.8;
 
-                sl.sendParticles(ModParticles.SWEEP_EVO.get(), particleX, particleY, particleZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                double attackType = 2.0D;
+
+                sl.sendParticles(ModParticles.SWEEP_EVO.get(), particleX, particleY, particleZ, 0, this.getYRot(), 2.5D, attackType, 1.0D);
             }
         }
 

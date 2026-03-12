@@ -579,7 +579,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
         boolean hit = super.doHurtTarget(target);
 
-        if (hit && this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+        if (hit && this.level() instanceof ServerLevel sl) {
 
             if (this.isHeroMode()) {
                 double d0 = -Math.sin(this.getYRot() * ((float)Math.PI / 180F));
@@ -589,7 +589,9 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 double particleY = this.getY() + (this.getBbHeight() * 0.5);
                 double particleZ = this.getZ() + d1 * 1.2;
 
-                sl.sendParticles(ModParticles.SWEEP_HERO.get(), particleX, particleY, particleZ, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                double attackType = (this.getAttackIndex() == 0) ? 1.0D : 0.0D;
+
+                sl.sendParticles(ModParticles.SWEEP_HERO.get(), particleX, particleY, particleZ, 0, this.getYRot(), 1.5D, attackType, 1.0D);
             }
 
             if (this.isHeroMode() && !this.isHeroAbilityActive() && !this.isHeroChargeReady()) {
