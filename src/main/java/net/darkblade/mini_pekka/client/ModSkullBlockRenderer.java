@@ -76,11 +76,6 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
 
         if (facing == null) {
             pose.translate(0.5F, 0.0F, 0.5F);
-
-            if (model instanceof MiniPekkaHeadModel) {
-                pose.translate(1.05F, 0.15F, 0.12F);
-            }
-
         } else {
             float horizontal = 0.25F;
             float vertical = 0.25F;
