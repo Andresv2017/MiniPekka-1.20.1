@@ -64,6 +64,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> CASTING_ABILITY =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> KILL_COUNT =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
@@ -148,23 +150,30 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
         if (stack.is(ModItems.STAR_ITEM.get()) && this.isTame() && this.isOwnedBy(player)) {
             if (!this.isStarMode()) {
-                if (!this.level().isClientSide) {
-                    this.setStarMode(true);
+                if (player.isCreative() || this.getKillCount() >= 50) {
+                    if (!this.level().isClientSide) {
+                        this.setStarMode(true);
 
-                    this.playSound(ModSounds.STAR_LEVEL_UP.get(), 1.0f, 1.0f);
-                    level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
-                    ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE.get(),
-                            this.getX(),
-                            this.getY() + this.getBbHeight() + 0.5D,
-                            this.getZ(),
-                            12,
-                            0.9D,
-                            0.4D,
-                            0.9D,
-                            0.0D);
-                    if (!player.getAbilities().instabuild) {
-                        stack.shrink(1);
+                        this.playSound(ModSounds.STAR_LEVEL_UP.get(), 1.0f, 1.0f);
+                        level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                                ModSounds.PANCAKES.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
+                        ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE.get(),
+                                this.getX(),
+                                this.getY() + this.getBbHeight() + 0.5D,
+                                this.getZ(),
+                                12,
+                                0.9D,
+                                0.4D,
+                                0.9D,
+                                0.0D);
+                        if (!player.getAbilities().instabuild) {
+                            stack.shrink(1);
+                        }
+                    }
+                } else {
+                    if (!this.level().isClientSide) {
+                        int remaining = 50 - this.getKillCount();
+                        player.displayClientMessage(Component.literal("Kills needed for Star Level: " + remaining), true);
                     }
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -266,6 +275,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.entityData.define(HERO_CHARGE, 0);
         this.entityData.define(HERO_ABILITY_ACTIVE, false);
         this.entityData.define(CASTING_ABILITY, false);
+        this.entityData.define(KILL_COUNT, 0);
     }
 
     public boolean hasPancakesSkin() {
@@ -301,6 +311,9 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
     public boolean isCastingAbility() { return this.entityData.get(CASTING_ABILITY); }
     public void setCastingAbility(boolean active) { this.entityData.set(CASTING_ABILITY, active); }
+
+    public int getKillCount() { return this.entityData.get(KILL_COUNT); }
+    public void setKillCount(int kills) { this.entityData.set(KILL_COUNT, kills); }
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -495,6 +508,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         tag.putInt("HeroCharge", this.getHeroCharge());
         tag.putBoolean("HeroAbilityActive", this.isHeroAbilityActive());
         tag.putInt("HeroAbilityTicksRemaining", this.heroAbilityTicksRemaining);
+        tag.putInt("KillCount", this.getKillCount());
     }
 
     @Override
@@ -509,6 +523,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.setHeroAbilityActive(abilityActive);
         this.heroAbilityTicksRemaining = tag.getInt("HeroAbilityTicksRemaining");
         if (abilityActive) this.applyHeroDamageBoost(true);
+        this.setKillCount(tag.getInt("KillCount"));
     }
 
     @Override
@@ -606,6 +621,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         }
 
         return hit;
+    }
+
+    @Override
+    public boolean killedEntity(ServerLevel level, LivingEntity victim) {
+        boolean result = super.killedEntity(level, victim);
+        this.setKillCount(this.getKillCount() + 1);
+        return result;
     }
 
     private static final int HERO_ATTACK1_DURATION = 18;

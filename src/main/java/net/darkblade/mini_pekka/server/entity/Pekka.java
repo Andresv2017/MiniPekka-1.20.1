@@ -8,12 +8,12 @@ import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -56,6 +56,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     private static final EntityDataAccessor<Integer> ATTACK_INDEX =
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> EVO_ABILITY_FLASH_TICKS =
+            SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> KILL_COUNT =
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
@@ -144,19 +146,26 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
 
         if (stack.is(ModItems.STAR_ITEM.get()) && this.isTame() && this.isOwnedBy(player)) {
             if (!this.isStarMode()) {
-                if (!this.level().isClientSide) {
-                    this.setStarMode(true);
-                    this.playSound(ModSounds.STAR_LEVEL_UP.get(), 1.0f, 1.0f);
-                    ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE.get(),
-                            this.getX(),
-                            this.getY() + this.getBbHeight() + 0.5D,
-                            this.getZ(),
-                            16,
-                            0.9D,
-                            0.4D,
-                            0.9D,
-                            0.0D);
-                    if (!player.getAbilities().instabuild) stack.shrink(1);
+                if (player.isCreative() || this.getKillCount() >= 50) {
+                    if (!this.level().isClientSide) {
+                        this.setStarMode(true);
+                        this.playSound(ModSounds.STAR_LEVEL_UP.get(), 1.0f, 1.0f);
+                        ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE.get(),
+                                this.getX(),
+                                this.getY() + this.getBbHeight() + 0.5D,
+                                this.getZ(),
+                                16,
+                                0.9D,
+                                0.4D,
+                                0.9D,
+                                0.0D);
+                        if (!player.getAbilities().instabuild) stack.shrink(1);
+                    }
+                } else {
+                    if (!this.level().isClientSide) {
+                        int remaining = 50 - this.getKillCount();
+                        player.displayClientMessage(Component.literal("Kills needed for Star Level: " + remaining), true);
+                    }
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
@@ -193,6 +202,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         this.entityData.define(IS_EVO_MODE, false);
         this.entityData.define(ATTACK_INDEX, 0);
         this.entityData.define(EVO_ABILITY_FLASH_TICKS, 0);
+        this.entityData.define(KILL_COUNT, 0);
     }
 
     public boolean isRaging() { return this.entityData.get(RAGING); }
@@ -206,6 +216,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public boolean isAttacking() { return this.entityData.get(DATA_ATTACKING); }
     public int getEvoAbilityFlashTicks() { return this.entityData.get(EVO_ABILITY_FLASH_TICKS); }
     public void setEvoAbilityFlashTicks(int ticks) { this.entityData.set(EVO_ABILITY_FLASH_TICKS, ticks); }
+    public int getKillCount() { return this.entityData.get(KILL_COUNT); }
+    public void setKillCount(int kills) { this.entityData.set(KILL_COUNT, kills); }
 
     private void setAttacking(boolean v) {
         boolean was = this.entityData.get(DATA_ATTACKING);
@@ -339,6 +351,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public boolean killedEntity(ServerLevel level, LivingEntity victim) {
         boolean result = super.killedEntity(level, victim);
 
+        this.setKillCount(this.getKillCount() + 1);
+
         if (this.isEvoMode() && !this.isDeadOrDying()) {
             float victimMaxHp = victim.getMaxHealth();
             float baseMaxHp   = (float) this.getAttributeBaseValue(Attributes.MAX_HEALTH);
@@ -410,6 +424,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         tag.putBoolean("IsStarMode", this.isStarMode());
         tag.putBoolean("IsEvoMode", this.isEvoMode());
         tag.putFloat("EvoAbsorption", this.getAbsorptionAmount());
+        tag.putInt("KillCount", this.getKillCount());
     }
 
     @Override
@@ -420,6 +435,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         if (tag.contains("EvoAbsorption")) {
             this.setAbsorptionAmount(tag.getFloat("EvoAbsorption"));
         }
+        this.setKillCount(tag.getInt("KillCount"));
     }
 
     @Override

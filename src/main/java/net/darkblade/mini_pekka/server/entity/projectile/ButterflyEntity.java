@@ -49,45 +49,52 @@ public class ButterflyEntity extends Entity implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        lifeTicks++;
 
         int targetId = this.entityData.get(TARGET_ID);
-        if (targetId != -1) {
-            Entity target = this.level().getEntity(targetId);
 
-            if (target != null && target.isAlive() && target instanceof Pekka pekka) {
+        if (targetId == -1) {
+            if (!this.level().isClientSide()) this.discard();
+            return;
+        }
 
-                if (lifeTicks <= 15) {
-                    if (lifeTicks == 1) {
-                        this.setDeltaMovement(0, 0.35, 0);
-                    } else {
-                        this.setDeltaMovement(this.getDeltaMovement().scale(0.80));
-                    }
-                } else if (lifeTicks <= 40) {
-                    double hoverMotionY = Math.sin((lifeTicks - 15) * 0.25) * 0.015;
-                    this.setDeltaMovement(0, hoverMotionY, 0);
-                } else {
-                    Vec3 targetPos = new Vec3(target.getX(), target.getY() + (target.getBbHeight() * 0.55), target.getZ());
-                    Vec3 moveVec = targetPos.subtract(this.position());
+        Entity target = this.level().getEntity(targetId);
 
-                    if (this.getBoundingBox().intersects(target.getBoundingBox().inflate(-0.3))) {
-                        if (!this.level().isClientSide()) {
-                            pekka.receiveButterflyHeal(this.healAmount);
-                            this.discard();
-                        }
-                    } else {
-                        Vec3 currentMotion = this.getDeltaMovement();
-                        Vec3 desiredMotion = moveVec.normalize().scale(0.50);
-                        this.setDeltaMovement(currentMotion.lerp(desiredMotion, 0.15));
-                    }
-                }
+        if (target == null || !target.isAlive() || !(target instanceof Pekka pekka)) {
+            if (!this.level().isClientSide()) this.discard();
+            return;
+        }
+
+        lifeTicks++;
+
+        if (lifeTicks <= 15) {
+            // Fase 1: Elevación
+            if (lifeTicks == 1) {
+                this.setDeltaMovement(0, 0.35, 0);
             } else {
-                if (!this.level().isClientSide()) this.discard();
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.80));
+            }
+        } else if (lifeTicks <= 40) {
+            double hoverMotionY = Math.sin((lifeTicks - 15) * 0.25) * 0.015;
+            this.setDeltaMovement(0, hoverMotionY, 0);
+        } else {
+            Vec3 targetPos = new Vec3(target.getX(), target.getY() + (target.getBbHeight() * 0.55), target.getZ());
+            Vec3 moveVec = targetPos.subtract(this.position());
+
+            if (this.getBoundingBox().intersects(target.getBoundingBox().inflate(-0.3))) {
+                if (!this.level().isClientSide()) {
+                    pekka.receiveButterflyHeal(this.healAmount);
+                    this.discard();
+                }
+                return;
+            } else {
+                Vec3 currentMotion = this.getDeltaMovement();
+                Vec3 desiredMotion = moveVec.normalize().scale(0.50);
+                this.setDeltaMovement(currentMotion.lerp(desiredMotion, 0.15));
             }
         }
+
         this.setPos(this.getX() + this.getDeltaMovement().x, this.getY() + this.getDeltaMovement().y, this.getZ() + this.getDeltaMovement().z);
     }
-
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("HealAmount", this.healAmount);
