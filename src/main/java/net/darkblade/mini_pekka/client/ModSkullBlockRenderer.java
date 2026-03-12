@@ -3,6 +3,8 @@ package net.darkblade.mini_pekka.client;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.darkblade.mini_pekka.client.model.MiniPekkaHeadModel;
+import net.darkblade.mini_pekka.client.model.PekkaHeadModel;
 import net.darkblade.mini_pekka.server.block.ModSkullBlock;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.SkullModelBase;
@@ -71,8 +73,14 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
                                    PoseStack pose, MultiBufferSource buffers, int light,
                                    SkullModelBase model, RenderType rt) {
         pose.pushPose();
+
         if (facing == null) {
             pose.translate(0.5F, 0.0F, 0.5F);
+
+            if (model instanceof MiniPekkaHeadModel) {
+                pose.translate(1.05F, 0.15F, 0.12F);
+            }
+
         } else {
             float horizontal = 0.25F;
             float vertical = 0.25F;
@@ -89,13 +97,11 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
         pose.popPose();
     }
 
-    /** Crea el mapa de tipo->modelo. Sólo nuestro tipo MINI_PEKKA. */
     public static Map<SkullBlock.Type, SkullModelBase> createSkullRenderers(EntityModelSet models) {
         ImmutableMap.Builder<SkullBlock.Type, SkullModelBase> builder = ImmutableMap.builder();
 
-        builder.put(ModSkullBlock.Types.MINI_PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
-        builder.put(ModSkullBlock.Types.PEKKA, new SkullModel(models.bakeLayer(ModBlockEntityModelLayers.PEKKA_HEAD)));
-
+        builder.put(ModSkullBlock.Types.MINI_PEKKA, new MiniPekkaHeadModel(models.bakeLayer(ModBlockEntityModelLayers.MINI_PK_HEAD)));
+        builder.put(ModSkullBlock.Types.PEKKA, new PekkaHeadModel(models.bakeLayer(ModBlockEntityModelLayers.PEKKA_HEAD)));
         return builder.build();
     }
 }

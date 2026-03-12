@@ -17,7 +17,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class ModSkullBlock extends SkullBlock {
 
     protected static final VoxelShape MINI_PEKKA_SHAPE =
-            Block.box(0.0D, 0.0D, 3.5D, 16.0D, 10.0D, 12.5D);
+            Block.box(0.0D, 0.0D, 3.5D, 16.0D, 14.0D, 12.5D);
 
     protected static final VoxelShape PEKKA_SHAPE =
             Block.box(0.0D, 0.0D, 3.5D, 16.0D, 12.0D, 12.5D);
