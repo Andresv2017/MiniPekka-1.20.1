@@ -29,6 +29,7 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.damagesource.DamageSource;
 import org.jetbrains.annotations.Nullable;
@@ -122,6 +123,22 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+
+        if (stack.is(Items.IRON_INGOT)) {
+            if (this.getHealth() < this.getMaxHealth()) {
+                if (!this.level().isClientSide) {
+                    this.heal(10.0F);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                    this.level().broadcastEntityEvent(this, (byte) 7);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            } else if (this.isTame() && this.isOwnedBy(player)) {
+                return InteractionResult.PASS;
+            }
+        }
+        // ----------------------------------------------
 
         if (stack.is(ModItems.EVO_CRYSTAL.get()) && this.isTame() && this.isOwnedBy(player)) {
             if (!this.isEvoMode()) {
