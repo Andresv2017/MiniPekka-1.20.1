@@ -107,5 +107,13 @@ public class ModSounds {
             SOUNDS.register("star_level_up",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "star_level_up")));
 
+    public static final RegistryObject<SoundEvent> HERO_BOX_OPEN =
+            SOUNDS.register("hero_box_open",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "hero_box_open")));
+
+    public static final RegistryObject<SoundEvent> HERO_HURT =
+            SOUNDS.register("entity.mini_pekka_hero.hurt",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.mini_pekka_hero.hurt")));
+
 
 }

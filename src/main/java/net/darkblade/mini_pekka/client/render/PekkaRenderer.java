@@ -11,5 +11,6 @@ public class PekkaRenderer extends GeoEntityRenderer<Pekka> {
         super(renderManager, new PekkaModel());
         this.addRenderLayer(new PekkaRageEffectLayer(this));
         this.addRenderLayer(new PekkaEvoAbilityLayer(this));
+        this.shadowRadius = 0.9f;
     }
 }

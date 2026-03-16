@@ -489,7 +489,24 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        return this.isHeroMode() ? ModSounds.HERO_AMBIENT.get() : null;
+        if (this.isHeroMode()) {
+            return ModSounds.HERO_AMBIENT.get();
+        }
+        return this.random.nextBoolean() ? ModSounds.PANCAKES.get() : ModSounds.ANA.get();
+    }
+
+    @Override
+    public void playAmbientSound() {
+        SoundEvent soundevent = this.getAmbientSound();
+        if (soundevent != null) {
+            float volume = this.getSoundVolume();
+
+            if (!this.isHeroMode()) {
+                volume *= 0.7F;
+            }
+
+            this.playSound(soundevent, volume, this.getVoicePitch());
+        }
     }
 
     @Override
@@ -711,5 +728,11 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     @Override
     public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
         return false;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return this.isHeroMode() ? ModSounds.HERO_HURT.get() : ModSounds.DEATH.get();
     }
 }

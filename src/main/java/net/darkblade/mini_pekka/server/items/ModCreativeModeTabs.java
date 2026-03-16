@@ -15,7 +15,7 @@ public class ModCreativeModeTabs {
 
     public static final RegistryObject<CreativeModeTab> MPEKKA_TAB = CREATIVE_MODE_TABS.register("mpekka_tab",
             () -> CreativeModeTab.builder()
-                    .icon(() -> new ItemStack(ModItems.MINI_PK_HEAD.get()))
+                    .icon(() -> new ItemStack(ModItems.CREATIVE_TAB_LOGO.get()))
                     .title(Component.translatable("creativetab.mpekka_tab"))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.MINI_PK_HEAD.get());

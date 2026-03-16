@@ -37,7 +37,7 @@ public class RageThrownPotion extends ThrownPotion {
     protected void onHit(HitResult hitResult) {
         if (!this.level().isClientSide) {
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                    ModSounds.RAGE_BREAK.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
+                    ModSounds.RAGE_BREAK.get(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 
             if (this.level() instanceof ServerLevel serverLevel) {
                 ModParticleUtils.spawnRageAura(serverLevel, hitResult.getLocation(), EFFECT_RADIUS);

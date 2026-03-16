@@ -396,6 +396,20 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             float baseMaxHp = (float) this.getAttributeBaseValue(Attributes.MAX_HEALTH);
             this.applyEvoHeal(healAmount, baseMaxHp);
             this.setEvoAbilityFlashTicks(40);
+
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                    net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 1.0f, 1.0f);
+
+            ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PEKKA_ABILITY.get(),
+                    this.getX(),
+                    this.getY() + this.getBbHeight() + 0.5D,
+                    this.getZ(),
+                    15,
+                    0.9D,
+                    0.4D,
+                    0.9D,
+                    0.0D);
+            // ------------------------------------------------------------------
         }
     }
 

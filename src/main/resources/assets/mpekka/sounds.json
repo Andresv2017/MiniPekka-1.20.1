@@ -103,6 +103,14 @@
   "star_level_up": {
     "category": "neutral",
     "sounds": [{ "name": "mpekka:item/star_level_up","volume": 1.5, "pitch": 1.0, "stream": false }]
+  },
+  "hero_box_open": {
+    "category": "player",
+    "sounds": [{ "name": "mpekka:item/hero_box_open", "volume": 1.0, "pitch": 1.0, "stream": false }]
+  },
+  "entity.mini_pekka_hero.hurt": {
+    "subtitle": "subtitles.mini_pekka_hero.hurt",
+    "sounds": [{ "name": "mpekka:entity/mini_pekka_hero/pk_hero_hurt", "volume": 1.5, "pitch": 1.0, "stream": false }]
   }
 }
 

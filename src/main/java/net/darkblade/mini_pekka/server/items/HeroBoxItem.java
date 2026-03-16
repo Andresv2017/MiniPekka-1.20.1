@@ -1,5 +1,6 @@
 package net.darkblade.mini_pekka.server.items;
 
+import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -41,7 +42,7 @@ public class HeroBoxItem extends Item {
             }
 
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.5F);
+                    ModSounds.HERO_BOX_OPEN.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
 
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());

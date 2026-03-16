@@ -81,4 +81,7 @@ public class ModItems {
 
     public static final RegistryObject<Item> HERO_BOX = ITEMS.register("hero_box",
             () -> new HeroBoxItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> CREATIVE_TAB_LOGO = ITEMS.register("creative_tab_logo",
+            () -> new Item(new Item.Properties()));
 }

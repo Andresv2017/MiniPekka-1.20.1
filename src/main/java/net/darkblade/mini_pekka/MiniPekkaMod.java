@@ -141,6 +141,7 @@ public class MiniPekkaMod
             event.registerSpriteSet(ModParticles.STAR_PARTICLE_EVO.get(), FallingStarParticle.Provider::new);
             event.registerSpriteSet(ModParticles.SWEEP_EVO.get(), ModSweepAttackParticle.Provider::new);
             event.registerSpriteSet(ModParticles.SWEEP_HERO.get(), ModSweepAttackParticle.Provider::new);
+            event.registerSpriteSet(ModParticles.STAR_PEKKA_ABILITY.get(), FallingStarParticle.Provider::new);
         }
         @SubscribeEvent
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {

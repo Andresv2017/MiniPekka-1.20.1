@@ -11,7 +11,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class ButterflyRenderer extends GeoEntityRenderer<ButterflyEntity> {
     public ButterflyRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new ButterflyModel());
-        this.shadowRadius = 0.0f;
+        this.shadowRadius = 0.2f;
     }
 
     @Override

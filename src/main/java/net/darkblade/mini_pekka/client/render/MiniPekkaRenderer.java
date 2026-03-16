@@ -11,5 +11,6 @@ public class MiniPekkaRenderer extends GeoEntityRenderer<MiniPekka> {
         super(renderManager, new MiniPekkaModel());
         this.addRenderLayer(new MiniPekkaRageEffectLayer(this));
         this.addRenderLayer(new MiniPekkaHeroChargeLayer(this));
+        this.shadowRadius = 0.5f;
     }
 }

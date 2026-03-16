@@ -29,6 +29,8 @@ public class ModParticles {
 
     public static final RegistryObject<SimpleParticleType> SWEEP_HERO = PARTICLE_TYPES.register("sweep_hero", () -> new SimpleParticleType(true));
 
+    public static final RegistryObject<SimpleParticleType> STAR_PEKKA_ABILITY = PARTICLE_TYPES.register("star_pekka_ability", () -> new SimpleParticleType(true));
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }
