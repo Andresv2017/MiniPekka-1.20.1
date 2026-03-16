@@ -140,6 +140,17 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
 
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
                             ModSounds.HERO_SPAWN.get(), SoundSource.NEUTRAL, 1.5f, 1.0f);
+
+                    ((ServerLevel) this.level()).sendParticles(ModParticles.STAR_PARTICLE_EVO.get(),
+                            this.getX(),
+                            this.getY() + this.getBbHeight() + 0.5D,
+                            this.getZ(),
+                            16,
+                            0.9D,
+                            0.4D,
+                            0.9D,
+                            0.0D);
+
                     if (!player.getAbilities().instabuild) {
                         stack.shrink(1);
                     }
