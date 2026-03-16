@@ -201,37 +201,6 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 }
                 return InteractionResult.sidedSuccess(level().isClientSide);
             }
-
-            // Normal pancake healing
-            if (this.getHealth() < this.getMaxHealth()) {
-                if (!level().isClientSide) {
-                    float healAmount = 6.0F;
-                    this.heal(healAmount);
-
-                    ((ServerLevel) level()).sendParticles(
-                            ParticleTypes.HEART,
-                            getX(), getY() + getBbHeight() * 0.6D, getZ(),
-                            6, 0.3D, 0.3D, 0.3D, 0.02D
-                    );
-
-                    long now = level().getGameTime();
-                    if (now - lastPancakeSfxTick >= 120L) {
-                        level().playSound(
-                                null, this.getX(), this.getY(), this.getZ(),
-                                ModSounds.PANCAKES.get(),
-                                SoundSource.NEUTRAL, 1.0f, 1.0f
-                        );
-                        lastPancakeSfxTick = now;
-                    }
-
-                    level().playSound(null, this, SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 1.0f, 1.0f);
-
-                    if (!player.getAbilities().instabuild) {
-                        stack.shrink(1);
-                    }
-                }
-                return InteractionResult.sidedSuccess(level().isClientSide);
-            }
             return InteractionResult.PASS;
         }
 
