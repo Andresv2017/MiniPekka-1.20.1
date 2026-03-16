@@ -19,13 +19,13 @@ public class MPekkaEntities {
     public static final RegistryObject<EntityType<MiniPekka>> MPEKKA =
             ENTITY_REGISTER.register("m_pk",
                     () -> EntityType.Builder.of(MiniPekka::new, MobCategory.CREATURE)
-                            .sized(1.25f, 1.25f)
+                            .sized(0.9f, 1.25f)
                             .build(new ResourceLocation(MiniPekkaMod.MODID, "m_pk").toString()));
 
     public static final RegistryObject<EntityType<Pekka>> PEKKA =
             ENTITY_REGISTER.register("pekka",
                     () -> EntityType.Builder.of(Pekka::new, MobCategory.CREATURE)
-                            .sized(1.8f, 2.7f)
+                            .sized(1.5f, 2.7f)
                             .build(new ResourceLocation(MiniPekkaMod.MODID, "pekka").toString()));
 
     public static final RegistryObject<EntityType<RageThrownPotion>> RAGE_POTION_PROJECTILE =
