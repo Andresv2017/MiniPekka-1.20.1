@@ -45,7 +45,7 @@
   },
   "entity.pekka.ambient": {
     "subtitle": "subtitles.pekka.ambient",
-    "sounds": [{ "name": "mpekka:entity/pekka/pekka_ambient", "volume": 1.0, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka/pekka_ambient", "volume": 0.75, "pitch": 1.0, "stream": false }]
   },
 
   "entity.pekka_evo.attack": {
@@ -69,7 +69,7 @@
   },
   "entity.pekka_evo.ambient": {
     "subtitle": "subtitles.pekka_evo.ambient",
-    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_ambient", "volume": 1.2, "pitch": 1.0, "stream": false }]
+    "sounds": [{ "name": "mpekka:entity/pekka_evo/pk_evo_ambient", "volume": 0.9, "pitch": 1.0, "stream": false }]
   },
 
   "entity.mini_pekka_hero.ability": {
@@ -111,6 +111,10 @@
   "entity.mini_pekka_hero.hurt": {
     "subtitle": "subtitles.mini_pekka_hero.hurt",
     "sounds": [{ "name": "mpekka:entity/mini_pekka_hero/pk_hero_hurt", "volume": 1.5, "pitch": 1.0, "stream": false }]
+  },
+  "entity.pekka.hurt": {
+    "subtitle": "sounds.mpekka.pekka_hurt",
+    "sounds": [{"name": "mpekka:entity/pekka/pekka_hurt", "volume": 1.0, "pitch": 1.0, "stream": false}]
   }
 }
 

@@ -268,7 +268,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                                 : ModSounds.PEKKA_ATTACK2.get();
                     }
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            attackSound, SoundSource.NEUTRAL, 1.5f, pitch);
+                            attackSound, SoundSource.NEUTRAL, 1.2f, pitch);
                     this.attackSoundDelay = -1;
                 }
             }
@@ -304,7 +304,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                             ? ModSounds.PEKKA_EVO_STEP.get()
                             : ModSounds.PEKKA_STEP.get();
                     level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                            stepSound, this.getSoundSource(), 0.8F, 0.7F);
+                            stepSound, this.getSoundSource(), 0.7F, 0.7F);
                     lastStepSfxTick = now;
                 }
             }
@@ -530,5 +530,11 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         }
 
         return hit;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return ModSounds.PEKKA_HURT.get();
     }
 }

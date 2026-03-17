@@ -55,6 +55,10 @@ public class ModSounds {
             SOUNDS.register("entity.pekka.spawn",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.spawn")));
 
+    public static final RegistryObject<SoundEvent> PEKKA_HURT =
+            SOUNDS.register("entity.pekka.hurt",
+                    () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.hurt")));
+
     public static final RegistryObject<SoundEvent> PEKKA_AMBIENT =
             SOUNDS.register("entity.pekka.ambient",
                     () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MiniPekkaMod.MODID, "entity.pekka.ambient")));
