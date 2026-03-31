@@ -39,6 +39,12 @@ public class ModItems {
     public static final RegistryObject<Item> PANCAKE = ITEMS.register("pancake",
             () -> new PancakeItem(new Item.Properties().food(PANCAKE_FOOD)));
 
+    public static final RegistryObject<Item> GOLDEN_SPATULA = ITEMS.register("golden_spatula",
+            () -> new GoldenSpatulaItem(Tiers.GOLD, 3, -2.0F, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> PEKKA_SWORD = ITEMS.register("pekka_sword",
+            () -> new SwordItem(Tiers.NETHERITE, 8, -3.3F, new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> PK_SWORD = ITEMS.register("pk_sword",
             () -> new PkSwordItem(Tiers.NETHERITE, 3.5F, -2.4F,
                     new Item.Properties().fireResistant().rarity(Rarity.RARE)));

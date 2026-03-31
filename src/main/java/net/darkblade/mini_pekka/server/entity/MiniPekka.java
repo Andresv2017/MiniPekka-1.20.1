@@ -66,6 +66,8 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> KILL_COUNT =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> COMMAND_STATE =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
@@ -116,7 +118,17 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 this::setAttacking,
                 this::getHeroAttackTempo
         ));
-        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && MiniPekka.this.getCommandState() == 0;
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && MiniPekka.this.getCommandState() == 0;
+            }
+        });
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1D));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -212,16 +224,41 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 }
                 return InteractionResult.sidedSuccess(level().isClientSide);
             }
-            return InteractionResult.PASS;
+            else if (this.getHealth() < this.getMaxHealth()) {
+                if (!level().isClientSide) {
+                    this.heal(2.0F);
+                    this.playSound(SoundEvents.GENERIC_EAT, 1.0F, 1.0F);
+
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide);
+            }
         }
 
         if (this.isTame() && this.isOwnedBy(player) && stack.isEmpty()) {
             if (!level().isClientSide) {
-                boolean sit = !this.isOrderedToSit();
-                this.setOrderedToSit(sit);
-                this.setInSittingPose(sit);
-                this.getNavigation().stop();
-                this.setTarget(null);
+                int currentState = this.getCommandState();
+                int newState = (currentState + 1) % 3;
+                this.setCommandState(newState);
+
+                if (newState == 0) {
+                    this.setOrderedToSit(false);
+                    this.setInSittingPose(false);
+                    player.displayClientMessage(Component.literal("Mode: Follow"), true);
+                } else if (newState == 1) {
+                    this.setOrderedToSit(true);
+                    this.setInSittingPose(true);
+                    this.getNavigation().stop();
+                    this.setTarget(null);
+                    player.displayClientMessage(Component.literal("Mode: Sit"), true);
+                } else if (newState == 2) {
+                    this.setOrderedToSit(false);
+                    this.setInSittingPose(false);
+                    this.setTarget(null);
+                    player.displayClientMessage(Component.literal("Mode: Wander"), true);
+                }
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
@@ -256,6 +293,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.entityData.define(HERO_ABILITY_ACTIVE, false);
         this.entityData.define(CASTING_ABILITY, false);
         this.entityData.define(KILL_COUNT, 0);
+        this.entityData.define(COMMAND_STATE, 0);
     }
 
     public boolean hasPancakesSkin() {
@@ -267,33 +305,25 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     }
 
     public boolean isRaging() {return this.entityData.get(RAGING);}
-
     public void setRaging(boolean value) {this.entityData.set(RAGING, value);}
-
     public boolean isStarMode() {return this.entityData.get(IS_STAR_MODE);}
-
     public void setStarMode(boolean isStar) {this.entityData.set(IS_STAR_MODE, isStar);}
-
     public boolean isHeroMode() { return this.entityData.get(IS_HERO_MODE); }
-
     public void setHeroMode(boolean hero) { this.entityData.set(IS_HERO_MODE, hero); }
-
     public int getAttackIndex() { return this.entityData.get(ATTACK_INDEX); }
-
     public void setAttackIndex(int index) { this.entityData.set(ATTACK_INDEX, index); }
-
     public int getHeroCharge() { return this.entityData.get(HERO_CHARGE); }
     public void setHeroCharge(int charge) { this.entityData.set(HERO_CHARGE, Math.min(charge, HERO_CHARGE_MAX)); }
     public boolean isHeroChargeReady() { return this.getHeroCharge() >= HERO_CHARGE_MAX; }
     public boolean isHeroAbilityActive() { return this.entityData.get(HERO_ABILITY_ACTIVE); }
     public void setHeroAbilityActive(boolean active) { this.entityData.set(HERO_ABILITY_ACTIVE, active); }
     public int getHeroAbilityTicksRemaining() {return this.heroAbilityTicksRemaining; }
-
     public boolean isCastingAbility() { return this.entityData.get(CASTING_ABILITY); }
     public void setCastingAbility(boolean active) { this.entityData.set(CASTING_ABILITY, active); }
-
     public int getKillCount() { return this.entityData.get(KILL_COUNT); }
     public void setKillCount(int kills) { this.entityData.set(KILL_COUNT, kills); }
+    public int getCommandState() { return this.entityData.get(COMMAND_STATE); }
+    public void setCommandState(int state) { this.entityData.set(COMMAND_STATE, state); }
 
     @Override
     public void setCustomName(@Nullable Component name) {
@@ -506,6 +536,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         tag.putBoolean("HeroAbilityActive", this.isHeroAbilityActive());
         tag.putInt("HeroAbilityTicksRemaining", this.heroAbilityTicksRemaining);
         tag.putInt("KillCount", this.getKillCount());
+        tag.putInt("CommandState", this.getCommandState());
     }
 
     @Override
@@ -521,6 +552,9 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         this.heroAbilityTicksRemaining = tag.getInt("HeroAbilityTicksRemaining");
         if (abilityActive) this.applyHeroDamageBoost(true);
         this.setKillCount(tag.getInt("KillCount"));
+        if (tag.contains("CommandState")) {
+            this.setCommandState(tag.getInt("CommandState"));
+        }
     }
 
     @Override

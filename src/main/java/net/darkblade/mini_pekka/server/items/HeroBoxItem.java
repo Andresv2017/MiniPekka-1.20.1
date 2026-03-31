@@ -1,7 +1,6 @@
 package net.darkblade.mini_pekka.server.items;
 
 import net.darkblade.mini_pekka.sounds.ModSounds;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -20,10 +19,6 @@ public class HeroBoxItem extends Item {
         ItemStack itemStack = player.getItemInHand(hand);
 
         if (!level.isClientSide) {
-            if (!player.getAbilities().instabuild) {
-                itemStack.shrink(1);
-            }
-
             double chance = level.random.nextDouble();
             ItemStack reward;
 
@@ -39,6 +34,10 @@ public class HeroBoxItem extends Item {
 
             if (!player.getInventory().add(reward)) {
                 player.drop(reward, false);
+            }
+
+            if (!player.getAbilities().instabuild) {
+                itemStack.shrink(1);
             }
 
             level.playSound(null, player.getX(), player.getY(), player.getZ(),

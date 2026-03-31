@@ -20,7 +20,9 @@ public class ModCreativeModeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.MINI_PK_HEAD.get());
                         output.accept(ModItems.PEKKA_HEAD.get());
+                        output.accept(ModItems.GOLDEN_SPATULA.get());
                         output.accept(ModItems.PK_SWORD.get());
+                        output.accept(ModItems.PEKKA_SWORD.get());
                         output.accept(ModItems.PANCAKE.get());
                         output.accept(ModItems.RAGE_POTION.get());
                         output.accept(ModItems.MP_SPAWN_EGG.get());

@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -60,6 +61,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> KILL_COUNT =
             SynchedEntityData.defineId(Pekka.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> COMMAND_STATE =
+            SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
 
     private static final UUID RAGE_ATTACK_SPEED_UUID =
             UUID.fromString("ae7eb812-99f4-4e96-b3e4-184c99090c37");
@@ -109,7 +112,17 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
                 this::setAttacking,
                 this::getEvoAttackTempo
         ));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false) {
+            @Override
+            public boolean canUse() {
+            return super.canUse() && Pekka.this.getCommandState() == 0;
+        }
+
+            @Override
+            public boolean canContinueToUse() {
+            return super.canContinueToUse() && Pekka.this.getCommandState() == 0;
+        }
+        });
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1D));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -172,13 +185,40 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             }
         }
 
+        if (stack.is(Items.IRON_INGOT) && this.getHealth() < this.getMaxHealth() && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.level().isClientSide) {
+                this.heal(3.0F);
+                this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, 1.0F);
+
+                if (!player.getAbilities().instabuild) {
+                    stack.shrink(1);
+                }
+            }
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+
         if (this.isTame() && this.isOwnedBy(player) && stack.isEmpty()) {
             if (!level().isClientSide) {
-                boolean sit = !this.isOrderedToSit();
-                this.setOrderedToSit(sit);
-                this.setInSittingPose(sit);
-                this.getNavigation().stop();
-                this.setTarget(null);
+                int currentState = this.getCommandState();
+                int newState = (currentState + 1) % 3;
+                this.setCommandState(newState);
+
+                if (newState == 0) {
+                    this.setOrderedToSit(false);
+                    this.setInSittingPose(false);
+                    player.displayClientMessage(Component.literal("Mode: Follow"), true);
+                } else if (newState == 1) {
+                    this.setOrderedToSit(true);
+                    this.setInSittingPose(true);
+                    this.getNavigation().stop();
+                    this.setTarget(null);
+                    player.displayClientMessage(Component.literal("Mode: Sit"), true);
+                } else if (newState == 2) {
+                    this.setOrderedToSit(false);
+                    this.setInSittingPose(false);
+                    this.setTarget(null);
+                    player.displayClientMessage(Component.literal("Mode: Wander"), true);
+                }
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
@@ -204,6 +244,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         this.entityData.define(ATTACK_INDEX, 0);
         this.entityData.define(EVO_ABILITY_FLASH_TICKS, 0);
         this.entityData.define(KILL_COUNT, 0);
+        this.entityData.define(COMMAND_STATE, 0);
     }
 
     public boolean isRaging() { return this.entityData.get(RAGING); }
@@ -219,6 +260,8 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     public void setEvoAbilityFlashTicks(int ticks) { this.entityData.set(EVO_ABILITY_FLASH_TICKS, ticks); }
     public int getKillCount() { return this.entityData.get(KILL_COUNT); }
     public void setKillCount(int kills) { this.entityData.set(KILL_COUNT, kills); }
+    public int getCommandState() { return this.entityData.get(COMMAND_STATE); }
+    public void setCommandState(int state) { this.entityData.set(COMMAND_STATE, state); }
 
     private void setAttacking(boolean v) {
         boolean was = this.entityData.get(DATA_ATTACKING);
@@ -440,6 +483,7 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
         tag.putBoolean("IsEvoMode", this.isEvoMode());
         tag.putFloat("EvoAbsorption", this.getAbsorptionAmount());
         tag.putInt("KillCount", this.getKillCount());
+        tag.putInt("CommandState", this.getCommandState());
     }
 
     @Override
@@ -451,6 +495,9 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
             this.setAbsorptionAmount(tag.getFloat("EvoAbsorption"));
         }
         this.setKillCount(tag.getInt("KillCount"));
+        if (tag.contains("CommandState")) {
+            this.setCommandState(tag.getInt("CommandState"));
+        }
     }
 
     @Override
@@ -536,5 +583,11 @@ public class Pekka extends TamableAnimal implements GeoAnimatable, HeadRotatable
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return ModSounds.PEKKA_HURT.get();
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
+        super.dropCustomDeathLoot(source, looting, recentlyHit);
+        this.spawnAtLocation(new ItemStack(ModItems.PEKKA_HEAD.get()));
     }
 }
