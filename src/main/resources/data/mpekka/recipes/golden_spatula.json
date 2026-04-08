@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     " GG",
-    " GG",
+    " IG",
     " S "
   ],
   "key": {
@@ -11,6 +11,9 @@
     },
     "S": {
       "item": "minecraft:stick"
+    },
+    "I": {
+      "item": "mpekka:star_item"
     }
   },
   "result": {
