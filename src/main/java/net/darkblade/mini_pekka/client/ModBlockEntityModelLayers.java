@@ -9,7 +9,8 @@ public final class ModBlockEntityModelLayers {
     public static final ModelLayerLocation PEKKA_HEAD = register("pekka_head");
 
     private static ModelLayerLocation register(String layer) {
-        return new ModelLayerLocation(new ResourceLocation(MiniPekkaMod.MODID, layer), "main");
+        return new ModelLayerLocation(
+                ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, layer), "main");
     }
 
     private ModBlockEntityModelLayers() {}

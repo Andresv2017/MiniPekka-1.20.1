@@ -25,7 +25,12 @@ public class ModSkullBlock extends SkullBlock {
     @SuppressWarnings("unused")
     public enum Types implements SkullBlock.Type {
         MINI_PEKKA,
-        PEKKA
+        PEKKA;
+
+        @Override
+        public String getSerializedName() {
+            return this.name().toLowerCase(java.util.Locale.ROOT);
+        }
     }
 
     public ModSkullBlock(Type type, Properties props) {

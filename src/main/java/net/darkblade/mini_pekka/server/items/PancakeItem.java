@@ -65,7 +65,7 @@ public class PancakeItem extends Item {
             try {
                 mp.tame(player);
             } catch (Throwable ignore) {
-                mp.setTame(true);
+                mp.setTame(true, true);
                 mp.setOwnerUUID(player.getUUID());
             }
         }

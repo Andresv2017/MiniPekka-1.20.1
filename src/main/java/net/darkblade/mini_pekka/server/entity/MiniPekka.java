@@ -1,5 +1,6 @@
 package net.darkblade.mini_pekka.server.entity;
 
+import net.darkblade.mini_pekka.MiniPekkaMod;
 import net.darkblade.mini_pekka.client.particles.ModParticles;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
 import net.darkblade.mini_pekka.server.entity.ai.MiniPekkaAbilityGoal;
@@ -9,6 +10,7 @@ import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,13 +35,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.damagesource.DamageSource;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.UUID;
@@ -69,10 +71,10 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     private static final EntityDataAccessor<Integer> COMMAND_STATE =
             SynchedEntityData.defineId(MiniPekka.class, EntityDataSerializers.INT);
 
-    private static final UUID RAGE_ATTACK_SPEED_UUID =
-            UUID.fromString("fe6eb712-88f3-4e96-b3e4-084c99090b26");
-    private static final UUID HERO_DAMAGE_BOOST_UUID =
-            UUID.fromString("c3a1d7e5-9b2f-4a8c-b6d4-3e7f1a2c5d80");
+    private static final ResourceLocation RAGE_ATTACK_SPEED_ID =
+            ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "rage_attack_speed");
+    private static final ResourceLocation HERO_DAMAGE_BOOST_ID =
+            ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "hero_damage_boost");
 
     public static final int HERO_CHARGE_MAX = 6;
     private static final int HERO_ABILITY_DURATION_TICKS = 600;
@@ -118,7 +120,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 this::setAttacking,
                 this::getHeroAttackTempo
         ));
-        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F, false) {
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.4D, 8.0F, 2.0F) {
             @Override
             public boolean canUse() {
                 return super.canUse() && MiniPekka.this.getCommandState() == 0;
@@ -275,25 +277,25 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     public void setCachedHeadPitch(float pitch) { this.cachedHeadPitch = pitch; }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
         this.spawnAtLocation(new ItemStack(ModItems.MINI_PK_HEAD.get()));
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(PANCAKES, false);
-        this.entityData.define(DATA_ATTACKING, false);
-        this.entityData.define(RAGING, false);
-        this.entityData.define(IS_STAR_MODE, false);
-        this.entityData.define(IS_HERO_MODE, false);
-        this.entityData.define(ATTACK_INDEX, 0);
-        this.entityData.define(HERO_CHARGE, 0);
-        this.entityData.define(HERO_ABILITY_ACTIVE, false);
-        this.entityData.define(CASTING_ABILITY, false);
-        this.entityData.define(KILL_COUNT, 0);
-        this.entityData.define(COMMAND_STATE, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(PANCAKES, false);
+        builder.define(DATA_ATTACKING, false);
+        builder.define(RAGING, false);
+        builder.define(IS_STAR_MODE, false);
+        builder.define(IS_HERO_MODE, false);
+        builder.define(ATTACK_INDEX, 0);
+        builder.define(HERO_CHARGE, 0);
+        builder.define(HERO_ABILITY_ACTIVE, false);
+        builder.define(CASTING_ABILITY, false);
+        builder.define(KILL_COUNT, 0);
+        builder.define(COMMAND_STATE, 0);
     }
 
     public boolean hasPancakesSkin() {
@@ -364,7 +366,7 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
                 this.setPancakesSkin(true);
             }
 
-            boolean hasFury = this.hasEffect(ModEffects.RAGE.get());
+            boolean hasFury = this.hasEffect(ModEffects.RAGE);
             if (hasFury != this.isRaging()) {
                 this.setRaging(hasFury);
                 this.updateRageAttackSpeed(hasFury);
@@ -408,17 +410,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
             return;
         }
 
-        AttributeModifier existing = attr.getModifier(RAGE_ATTACK_SPEED_UUID);
-        if (existing != null) {
-            attr.removeModifier(existing);
-        }
+        attr.removeModifier(RAGE_ATTACK_SPEED_ID);
 
         if (raging) {
             attr.addTransientModifier(new AttributeModifier(
-                    RAGE_ATTACK_SPEED_UUID,
-                    "mini_pekka_rage_attack_speed",
+                    RAGE_ATTACK_SPEED_ID,
                     0.3D,
-                    AttributeModifier.Operation.MULTIPLY_TOTAL
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
         }
     }
@@ -427,15 +425,13 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
         AttributeInstance attr = this.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attr == null) return;
 
-        AttributeModifier existing = attr.getModifier(HERO_DAMAGE_BOOST_UUID);
-        if (existing != null) attr.removeModifier(existing);
+        attr.removeModifier(HERO_DAMAGE_BOOST_ID);
 
         if (activate) {
             attr.addTransientModifier(new AttributeModifier(
-                    HERO_DAMAGE_BOOST_UUID,
-                    "hero_damage_boost",
+                    HERO_DAMAGE_BOOST_ID,
                     HERO_DAMAGE_MULTIPLIER,
-                    AttributeModifier.Operation.MULTIPLY_TOTAL
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
         }
     }
@@ -724,9 +720,14 @@ public class MiniPekka extends TamableAnimal implements GeoAnimatable, HeadRotat
     }
 
     @Override
+    public boolean isFood(ItemStack stack) {
+        return false;
+    }
+
+    @Override
     public void onEffectRemoved(MobEffectInstance effect) {
         super.onEffectRemoved(effect);
-        if (effect.getEffect() == ModEffects.RAGE.get()) {
+        if (effect.is(ModEffects.RAGE)) {
             updateRageAttackSpeed(false);
         }
     }

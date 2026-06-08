@@ -8,16 +8,16 @@ import software.bernie.geckolib.model.GeoModel;
 public class ButterflyModel extends GeoModel<ButterflyEntity> {
     @Override
     public ResourceLocation getModelResource(ButterflyEntity object) {
-        return new ResourceLocation(MiniPekkaMod.MODID, "geo/entity/butterfly.geo.json");
+        return ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "geo/entity/butterfly.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(ButterflyEntity object) {
-        return new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/butterfly.png");
+        return ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "textures/entity/butterfly.png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(ButterflyEntity object) {
-        return new ResourceLocation(MiniPekkaMod.MODID, "animations/entity/butterfly.animation.json");
+        return ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "animations/entity/butterfly.animation.json");
     }
 }

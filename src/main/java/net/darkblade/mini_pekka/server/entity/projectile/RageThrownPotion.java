@@ -2,6 +2,7 @@ package net.darkblade.mini_pekka.server.entity.projectile;
 
 import net.darkblade.mini_pekka.client.particles.util.ModParticleUtils;
 import net.darkblade.mini_pekka.server.effect.ModEffects;
+import net.darkblade.mini_pekka.server.items.ModItems;
 import net.darkblade.mini_pekka.sounds.ModSounds;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.darkblade.mini_pekka.server.items.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -64,7 +64,7 @@ public class RageThrownPotion extends ThrownPotion {
             if (isAlly(target, ownerUUID)) {
                 // Aliado: aplicar efecto de rage (boost)
                 MobEffectInstance furyEffect = new MobEffectInstance(
-                        ModEffects.RAGE.get(), duration, amplifier, false, true
+                        ModEffects.RAGE, duration, amplifier, false, true
                 );
                 target.addEffect(furyEffect, ownerEntity instanceof LivingEntity l ? l : null);
             } else {

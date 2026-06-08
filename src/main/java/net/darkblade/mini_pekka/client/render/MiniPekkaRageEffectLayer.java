@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.server.entity.MiniPekka;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -15,13 +16,13 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 public class MiniPekkaRageEffectLayer extends GeoRenderLayer<MiniPekka> {
 
     private static final ResourceLocation OVERLAY_DEFAULT =
-            new ResourceLocation("mpekka", "textures/entity/mini_pekka_rage_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/mini_pekka_rage_overlay.png");
     private static final ResourceLocation OVERLAY_PANCAKE =
-            new ResourceLocation("mpekka", "textures/entity/mini_pk_pancake_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/mini_pk_pancake_overlay.png");
     private static final ResourceLocation OVERLAY_HERO =
-            new ResourceLocation("mpekka", "textures/entity/mini_pk_hero_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/mini_pk_hero_overlay.png");
     private static final ResourceLocation OVERLAY_HERO_PANCAKE =
-            new ResourceLocation("mpekka", "textures/entity/mini_pk_hero_pancake_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/mini_pk_hero_pancake_overlay.png");
 
     private static final float R = 0.7F;
     private static final float G = 0.3F;
@@ -66,6 +67,9 @@ public class MiniPekkaRageEffectLayer extends GeoRenderLayer<MiniPekka> {
         ResourceLocation overlayTex = getOverlayTexture(animatable);
         RenderType rageRenderType = RenderType.entityTranslucentEmissive(overlayTex);
 
+        int colour = FastColor.ARGB32.color(
+                (int) (currentAlpha * 255.0F), (int) (R * 255.0F), (int) (G * 255.0F), (int) (B * 255.0F));
+
         this.getRenderer().reRender(
                 bakedModel,
                 poseStack,
@@ -76,8 +80,7 @@ public class MiniPekkaRageEffectLayer extends GeoRenderLayer<MiniPekka> {
                 partialTick,
                 packedLight,
                 packedOverlay,
-                R, G, B,
-                currentAlpha
+                colour
         );
     }
 }

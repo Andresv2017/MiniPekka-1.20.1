@@ -2,18 +2,18 @@ package net.darkblade.mini_pekka.client;
 
 import net.darkblade.mini_pekka.MiniPekkaMod;
 import net.darkblade.mini_pekka.server.block.ModBlocks;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModBlockEntities {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MiniPekkaMod.MODID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MiniPekkaMod.MODID);
 
-    public static final RegistryObject<BlockEntityType<ModSkullBlockEntity>> EFFECT_SKULL =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ModSkullBlockEntity>> EFFECT_SKULL =
             BLOCK_ENTITY_TYPES.register("effect_skull",
                     () -> BlockEntityType.Builder.of(
                                     ModSkullBlockEntity::new,

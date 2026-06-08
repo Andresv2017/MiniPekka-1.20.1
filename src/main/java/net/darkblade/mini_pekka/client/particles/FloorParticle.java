@@ -13,7 +13,7 @@ public abstract class FloorParticle extends TextureSheetParticle {
     protected FloorParticle(ClientLevel level, double x, double y, double z) {
         super(level, x, y, z);
     }
-    @Override
+
     public boolean shouldCull() {
         return false;
     }
@@ -45,8 +45,11 @@ public abstract class FloorParticle extends TextureSheetParticle {
         this.makeCornerVertex(vertexConsumer, avector3f[3], this.getU0(), this.getV1(), j);
     }
 
-    void makeCornerVertex(VertexConsumer p_254493_, Vector3f p_253752_, float p_254250_, float p_254047_, int p_253814_) {
-        p_254493_.vertex(p_253752_.x(), p_253752_.y(), p_253752_.z()).uv(p_254250_, p_254047_).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(p_253814_).endVertex();
+    void makeCornerVertex(VertexConsumer consumer, Vector3f pos, float u, float v, int light) {
+        consumer.addVertex(pos.x(), pos.y(), pos.z())
+                .setUv(u, v)
+                .setColor(this.rCol, this.gCol, this.bCol, this.alpha)
+                .setLight(light);
     }
 
 }

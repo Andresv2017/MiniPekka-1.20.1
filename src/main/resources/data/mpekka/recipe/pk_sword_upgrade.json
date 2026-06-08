@@ -10,6 +10,6 @@
     "item": "minecraft:diamond"
   },
   "result": {
-    "item": "mpekka:pk_sword"
+    "id": "mpekka:pk_sword"
   }
 }

@@ -10,6 +10,6 @@
     "item": "minecraft:netherite_ingot"
   },
   "result": {
-    "item": "mpekka:pekka_sword"
+    "id": "mpekka:pekka_sword"
   }
 }

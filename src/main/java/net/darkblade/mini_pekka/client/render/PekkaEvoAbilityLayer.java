@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.server.entity.Pekka;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -51,6 +52,9 @@ public class PekkaEvoAbilityLayer extends GeoRenderLayer<Pekka> {
         float t = Mth.clamp(raw, 0.0F, 1.0F);
         float alpha = t * t * t * (t * (t * 6.0F - 15.0F) + 10.0F);
 
+        int colour = FastColor.ARGB32.color(
+                (int) (alpha * 255.0F), (int) (0.7F * 255.0F), (int) (0.3F * 255.0F), 255);
+
         this.getRenderer().reRender(
                 bakedModel,
                 poseStack,
@@ -61,8 +65,7 @@ public class PekkaEvoAbilityLayer extends GeoRenderLayer<Pekka> {
                 partialTick,
                 packedLight,
                 packedOverlay,
-                0.7F, 0.3F, 1.0F,
-                alpha
+                colour
         );
     }
 }

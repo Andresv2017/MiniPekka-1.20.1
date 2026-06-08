@@ -1,28 +1,24 @@
 package net.darkblade.mini_pekka.server.loot;
 
-import com.google.common.base.Suppliers;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
-
 public class AddItemModifier extends LootModifier {
-    public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
-            RecordCodecBuilder.create(inst -> codecStart(inst).and(inst.group(
-                    ForgeRegistries.ITEMS.getCodec().fieldOf("item").forGetter(m -> m.item),
-                    Codec.INT.fieldOf("min_count").forGetter(m -> m.minCount),
-                    Codec.INT.fieldOf("max_count").forGetter(m -> m.maxCount)
-            )).apply(inst, AddItemModifier::new))
-    );
+    public static final MapCodec<AddItemModifier> CODEC =
+            RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(inst.group(
+                    BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(m -> m.item),
+                    com.mojang.serialization.Codec.INT.fieldOf("min_count").forGetter(m -> m.minCount),
+                    com.mojang.serialization.Codec.INT.fieldOf("max_count").forGetter(m -> m.maxCount)
+            )).apply(inst, AddItemModifier::new));
 
     private final Item item;
     private final int minCount;
@@ -45,7 +41,7 @@ public class AddItemModifier extends LootModifier {
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
     }
 }
