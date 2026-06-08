@@ -1,7 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    { "item": "mpekka:hero_shards_small" }, { "item": "mpekka:hero_shards_small" }, { "item": "mpekka:hero_shards_small" }
-  ],
-  "result": { "item": "mpekka:hero_shards_medium", "count": 1 }
-}

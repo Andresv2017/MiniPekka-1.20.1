@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "mpekka:evo_fragment"
+    },
+    {
+      "item": "mpekka:evo_fragment"
+    },
+    {
+      "item": "mpekka:evo_fragment"
+    },
+    {
+      "item": "mpekka:evo_fragment"
+    },
+    {
+      "item": "mpekka:evo_fragment"
+    },
+    {
+      "item": "mpekka:evo_fragment"
+    }
+  ],
+  "result": {
+    "id": "mpekka:evo_crystal",
+    "count": 1
+  }
+}

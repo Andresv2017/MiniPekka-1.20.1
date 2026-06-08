@@ -3,49 +3,52 @@ package net.darkblade.mini_pekka.server.entity;
 import net.darkblade.mini_pekka.MiniPekkaMod;
 import net.darkblade.mini_pekka.server.entity.projectile.ButterflyEntity;
 import net.darkblade.mini_pekka.server.entity.projectile.RageThrownPotion;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class MPekkaEntities {
 
     public static final DeferredRegister<EntityType<?>> ENTITY_REGISTER =
-            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MiniPekkaMod.MODID);
+            DeferredRegister.create(Registries.ENTITY_TYPE, MiniPekkaMod.MODID);
 
-    public static final RegistryObject<EntityType<MiniPekka>> MPEKKA =
+    public static final DeferredHolder<EntityType<?>, EntityType<MiniPekka>> MPEKKA =
             ENTITY_REGISTER.register("m_pk",
                     () -> EntityType.Builder.of(MiniPekka::new, MobCategory.CREATURE)
                             .sized(0.9f, 1.25f)
-                            .build(new ResourceLocation(MiniPekkaMod.MODID, "m_pk").toString()));
+                            .build(key("m_pk")));
 
-    public static final RegistryObject<EntityType<Pekka>> PEKKA =
+    public static final DeferredHolder<EntityType<?>, EntityType<Pekka>> PEKKA =
             ENTITY_REGISTER.register("pekka",
                     () -> EntityType.Builder.of(Pekka::new, MobCategory.CREATURE)
                             .sized(1.5f, 2.7f)
-                            .build(new ResourceLocation(MiniPekkaMod.MODID, "pekka").toString()));
+                            .build(key("pekka")));
 
-    public static final RegistryObject<EntityType<RageThrownPotion>> RAGE_POTION_PROJECTILE =
+    public static final DeferredHolder<EntityType<?>, EntityType<RageThrownPotion>> RAGE_POTION_PROJECTILE =
             ENTITY_REGISTER.register("rage_potion_projectile",
                     () -> EntityType.Builder.<RageThrownPotion>of(RageThrownPotion::new, MobCategory.MISC)
                             .sized(0.25F, 0.25F)
                             .clientTrackingRange(4)
                             .updateInterval(10)
-                            .build(new ResourceLocation(MiniPekkaMod.MODID, "rage_potion_projectile").toString()));
+                            .build(key("rage_potion_projectile")));
 
-    public static final RegistryObject<EntityType<ButterflyEntity>> BUTTERFLY =
+    public static final DeferredHolder<EntityType<?>, EntityType<ButterflyEntity>> BUTTERFLY =
             ENTITY_REGISTER.register("butterfly",
                     () -> EntityType.Builder.<ButterflyEntity>of(ButterflyEntity::new, MobCategory.MISC)
                             .sized(0.5f, 0.5f)
                             .clientTrackingRange(4)
                             .updateInterval(10)
-                            .build(new ResourceLocation(MiniPekkaMod.MODID, "butterfly").toString()));
+                            .build(key("butterfly")));
 
+    private static String key(String name) {
+        return ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, name).toString();
+    }
 
-    public static void register(IEventBus eventBus){
+    public static void register(IEventBus eventBus) {
         ENTITY_REGISTER.register(eventBus);
     }
 }

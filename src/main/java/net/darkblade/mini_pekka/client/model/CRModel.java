@@ -3,9 +3,9 @@ package net.darkblade.mini_pekka.client.model;
 import net.darkblade.mini_pekka.server.entity.HeadRotatable;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.TamableAnimal;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.molang.MolangParser;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.loading.math.MathParser;
 import software.bernie.geckolib.model.GeoModel;
 
 import static net.darkblade.mini_pekka.constants.CRConstans.HEAD_X_QUERY;
@@ -28,14 +28,15 @@ public abstract class CRModel<T extends TamableAnimal & GeoAnimatable & HeadRota
     }
 
     @Override
-    public void applyMolangQueries(T animatable, double animTime) {
-        super.applyMolangQueries(animatable, animTime);
+    public void applyMolangQueries(AnimationState<T> animationState, double animTime) {
+        super.applyMolangQueries(animationState, animTime);
 
-        MolangParser parser = MolangParser.INSTANCE;
+        T animatable = animationState.getAnimatable();
+        float headYaw = animatable.getCachedHeadYaw();
+        float headPitch = animatable.getCachedHeadPitch();
 
-        parser.setValue(HEAD_Y_QUERY, () -> animatable.getCachedHeadYaw());
-        parser.setValue(HEAD_X_QUERY, () -> animatable.getCachedHeadPitch());
-
+        // Expose the cached head rotation to the molang queries used by the animation.
+        MathParser.setVariable(HEAD_Y_QUERY, () -> headYaw);
+        MathParser.setVariable(HEAD_X_QUERY, () -> headPitch);
     }
 }
-

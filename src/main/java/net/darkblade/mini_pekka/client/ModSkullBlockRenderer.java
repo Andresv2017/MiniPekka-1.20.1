@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.WallSkullBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -36,9 +36,9 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
     private final Map<SkullBlock.Type, SkullModelBase> modelByType;
 
     public static final ResourceLocation MINI_PEKKA_HEAD_TEX =
-            new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/mini_pk_head/mini_pk_head.png");
+            ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "textures/entity/mini_pk_head/mini_pk_head.png");
     public static final ResourceLocation PEKKA_HEAD_TEX =
-            new ResourceLocation(MiniPekkaMod.MODID, "textures/entity/pekka_head/pekka_head.png");
+            ResourceLocation.fromNamespaceAndPath(MiniPekkaMod.MODID, "textures/entity/pekka_head/pekka_head.png");
 
     public ModSkullBlockRenderer(BlockEntityRendererProvider.Context ctx) {
         super(ctx);
@@ -87,7 +87,7 @@ public class ModSkullBlockRenderer extends SkullBlockRenderer implements BlockEn
 
         VertexConsumer vc = buffers.getBuffer(rt);
         model.setupAnim(anim, yRotDeg, 0.0F);
-        model.renderToBuffer(pose, vc, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+        model.renderToBuffer(pose, vc, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 
         pose.popPose();
     }

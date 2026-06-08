@@ -93,7 +93,7 @@ public class MiniPekkaHeroChargeLayer extends GeoRenderLayer<MiniPekka> {
         poseStack.scale(1.0F, 1.0F, 1.0F);
 
         RenderType rt = RenderType.entityTranslucentEmissive(
-                new net.minecraft.resources.ResourceLocation("minecraft", "textures/misc/white.png")
+                net.minecraft.resources.ResourceLocation.withDefaultNamespace("textures/misc/white.png")
         );
         VertexConsumer vc = bufferSource.getBuffer(rt);
         Matrix4f matrix = poseStack.last().pose();
@@ -129,13 +129,13 @@ public class MiniPekkaHeroChargeLayer extends GeoRenderLayer<MiniPekka> {
                           float x1, float y1, float x2, float y2,
                           float r, float g, float b, float a,
                           int packedLight) {
-        vc.vertex(matrix, x1, y1, 0).color(r, g, b, a).uv(0, 0)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(0, 0, 1).endVertex();
-        vc.vertex(matrix, x1, y2, 0).color(r, g, b, a).uv(0, 1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(0, 0, 1).endVertex();
-        vc.vertex(matrix, x2, y2, 0).color(r, g, b, a).uv(1, 1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(0, 0, 1).endVertex();
-        vc.vertex(matrix, x2, y1, 0).color(r, g, b, a).uv(1, 0)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(0, 0, 1).endVertex();
+        vc.addVertex(matrix, x1, y1, 0).setColor(r, g, b, a).setUv(0, 0)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
+        vc.addVertex(matrix, x1, y2, 0).setColor(r, g, b, a).setUv(0, 1)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
+        vc.addVertex(matrix, x2, y2, 0).setColor(r, g, b, a).setUv(1, 1)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
+        vc.addVertex(matrix, x2, y1, 0).setColor(r, g, b, a).setUv(1, 0)
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
     }
 }

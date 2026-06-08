@@ -6,6 +6,7 @@ import net.darkblade.mini_pekka.server.entity.Pekka;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -15,11 +16,11 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
 
     private static final ResourceLocation OVERLAY_DEFAULT =
-            new ResourceLocation("mpekka", "textures/entity/pekka_rage_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/pekka_rage_overlay.png");
     private static final ResourceLocation OVERLAY_STAR =
-            new ResourceLocation("mpekka", "textures/entity/pekka_star_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/pekka_star_overlay.png");
     private static final ResourceLocation OVERLAY_EVO =
-            new ResourceLocation("mpekka", "textures/entity/pekka_evo_overlay.png");
+            ResourceLocation.fromNamespaceAndPath("mpekka","textures/entity/pekka_evo_overlay.png");
 
     private static final float R = 0.7F;
     private static final float G = 0.3F;
@@ -60,6 +61,9 @@ public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
         ResourceLocation overlayTex = getOverlayTexture(animatable);
         RenderType rageRenderType = RenderType.entityTranslucentEmissive(overlayTex);
 
+        int colour = FastColor.ARGB32.color(
+                (int) (currentAlpha * 255.0F), (int) (R * 255.0F), (int) (G * 255.0F), (int) (B * 255.0F));
+
         this.getRenderer().reRender(
                 bakedModel,
                 poseStack,
@@ -70,8 +74,7 @@ public class PekkaRageEffectLayer extends GeoRenderLayer<Pekka> {
                 partialTick,
                 packedLight,
                 packedOverlay,
-                R, G, B,
-                currentAlpha
+                colour
         );
     }
 }

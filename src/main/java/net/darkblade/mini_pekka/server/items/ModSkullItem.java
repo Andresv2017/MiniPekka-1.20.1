@@ -1,13 +1,9 @@
 package net.darkblade.mini_pekka.server.items;
 
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-
-import java.util.function.Consumer;
 
 public abstract class ModSkullItem extends StandingAndWallBlockItem {
     public ModSkullItem(Block skull, Block wallSkull, Properties properties, Direction direction) {
